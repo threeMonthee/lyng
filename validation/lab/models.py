@@ -89,10 +89,17 @@ class OpenRouterClient:
         except urllib.error.HTTPError as e:
             body = e.read().decode("utf-8", "replace")
             e.close()
-            raise RequestError(classify(e.code, _error_of(body)), f"HTTP {e.code}：{body[:500]}", e.code) from e
+            raise RequestError(classify(e.code, _error_of(body)), self._redact(f"HTTP {e.code}：{body[:500]}"), e.code) from e
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            raise RequestError(FATAL, f"{type(e).__name__}：{e}") from e
-        return parse_response(payload)
+            raise RequestError(FATAL, self._redact(f"{type(e).__name__}：{e}")) from e
+        try:
+            return parse_response(payload)
+        except RequestError as e:
+            raise RequestError(e.kind, self._redact(str(e)), e.status) from e
+
+    def _redact(self, message: str) -> str:
+        """报错原文里常带模型 ID，记录前替换掉，免得从记录里对上代号。"""
+        return message.replace(self.model_id, "<模型>")
 
 
 def parse_response(payload: dict) -> Completion:

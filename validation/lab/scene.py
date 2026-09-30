@@ -115,7 +115,9 @@ class SceneRun:
             try:
                 comp = self.client.complete(messages, self.max_tokens, purpose)
             except RequestError as e:
-                rec.attempts.append({"error": f"请求失败：{e}", "status": e.status, "kind": e.kind, "cost": None,
+                # error 进入失败事件、会显示在盲评页上，只写状态码；服务商报错原文只留在 detail 里
+                rec.attempts.append({"error": f"请求失败：HTTP {e.status}" if e.status else "请求失败",
+                                     "detail": str(e), "status": e.status, "kind": e.kind, "cost": None,
                                      "latency_s": round(time.monotonic() - started, 3)})
                 if e.kind == TRANSIENT:
                     if attempt == 0:

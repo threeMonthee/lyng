@@ -13,6 +13,7 @@ from pathlib import Path
 
 import dataset
 import render
+from events import Event
 from models import FakeModel, OpenRouterClient
 from scene import Ledger, SceneResult, SceneRun
 
@@ -30,8 +31,11 @@ class Unit:
     result: SceneResult | None = None
     status: str = "not_run"
     reason: str | None = None
+    carried: dict | None = None  # 补跑时沿用的原记录；这样的场次不再跑
 
     def to_dict(self) -> dict:
+        if self.carried is not None:
+            return self.carried
         base = {"code": self.code, "scene": self.scene, "scale": self.scale, "repeat": self.repeat}
         if self.result:
             return base | self.result.to_dict()
@@ -40,7 +44,7 @@ class Unit:
 
 def parse_args(argv):
     p = argparse.ArgumentParser(description="lyng 核心体验盲测原型")
-    p.add_argument("--model", action="append", required=True, help="OpenRouter 模型 ID，可重复；用 --fake 时只作标签")
+    p.add_argument("--model", action="append", default=[], help="OpenRouter 模型 ID，可重复；用 --fake 时只作标签")
     p.add_argument("--adult-model", action="append", default=[], help="支持成人向的模型 ID（须同时出现在 --model 中）")
     p.add_argument("--scenes", default="all", help="逗号分隔的场景编号，默认全部")
     p.add_argument("--repeats", type=int, default=2, help="每个模型每个场景跑几次，默认 2")
@@ -51,7 +55,17 @@ def parse_args(argv):
     p.add_argument("--seed", type=int, help="代号分配的随机种子；默认随机")
     p.add_argument("--parallel", action="store_true", help="每个模型一个线程并行跑；同一模型内仍按顺序")
     p.add_argument("--out", type=Path, default=LAB_DIR / "runs", help="输出根目录")
+    p.add_argument("--resume", type=Path, help="补跑某次运行里未完成的场景版本，沿用原代号与原设置")
     args = p.parse_args(argv)
+    if args.resume:
+        if args.model or args.adult_model or args.scenes != "all" or args.seed is not None:
+            p.error("--resume 沿用原运行的模型、代号与场景，不能再指定 --model / --adult-model / --scenes / --seed")
+        if args.budget is None and not args.fake:
+            p.error("真实调用必须用 --budget 指定费用上限")
+        args.budget = args.budget or 1.0
+        return args
+    if not args.model:
+        p.error("至少指定一个 --model")
     if len(set(args.model)) != len(args.model):
         p.error("--model 有重复")
     if len(args.model) > len(CODES):
@@ -105,6 +119,9 @@ def _run_sequence(ds: dataset.Dataset, units: list[Unit], clients: dict[str, obj
                   max_tokens: int, backoff: float, sleep) -> None:
     done: dict[tuple, Unit] = {}
     for u in units:
+        if u.carried is not None:
+            done[(u.code, u.repeat, u.scene, u.scale)] = u
+            continue
         if ledger.halted:
             u.reason = f"运行已停止：{ledger.halted}"
             continue
@@ -157,10 +174,43 @@ def stats_by_model(units: list[Unit], models: dict[str, str]) -> dict:
     return {mid: stats([u for u in units if u.code == code]) for code, mid in sorted(models.items(), key=lambda kv: kv[1])}
 
 
+def read_key(path: Path) -> dict[str, str]:
+    """代号 → 模型 ID。只在程序内部使用，不打印。"""
+    models = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if "\t" in line:
+            code, model_id = line.split("\t", 1)
+            models[code] = model_id.strip()
+    return models
+
+
+def carried_units(orig: dict, models: dict[str, str]) -> list[Unit]:
+    """按原记录重建场次：已完成或服务商拒绝的沿用原结果，其余（技术失败、中止、未执行）待补跑。"""
+    units = []
+    for d in orig["units"]:
+        u = Unit(d["code"], models[d["code"]], d["scene"], d["scale"], d["repeat"])
+        if d["status"] in ("completed", "refused"):
+            u.status, u.reason, u.carried = d["status"], d.get("reason"), d
+            events = [Event.from_dict(e) for e in d["events"]]
+            u.result = SceneResult(d["scene"], d["scale"], d["status"], d.get("reason"), events, [], d.get("spent", 0.0))
+        units.append(u)
+    return units
+
+
 def main(argv=None) -> int:
     args = parse_args(argv)
     ds = dataset.load()
-    scene_ids = list(ds.scenes) if args.scenes == "all" else [s.strip() for s in args.scenes.split(",")]
+    orig = None
+    if args.resume:
+        orig = json.loads((args.resume / "record.json").read_text(encoding="utf-8"))
+        models = read_key(args.resume / "key.txt")
+        scene_ids, args.repeats = orig["settings"]["scenes"], orig["settings"]["repeats"]
+        args.adult_model = [models[c] for c in orig["adult_codes"]]
+    else:
+        scene_ids = list(ds.scenes) if args.scenes == "all" else [s.strip() for s in args.scenes.split(",")]
+        shuffled = list(args.model)
+        random.Random(args.seed).shuffle(shuffled)
+        models = dict(zip(CODES, shuffled))
     if unknown := [s for s in scene_ids if s not in ds.scenes]:
         raise SystemExit(f"未知场景：{unknown}")
     for sid in scene_ids:
@@ -168,19 +218,20 @@ def main(argv=None) -> int:
         if prev and (prev not in scene_ids or scene_ids.index(prev) > scene_ids.index(sid)):
             raise SystemExit(f"{sid} 依赖 {prev}，须同时选择并排在它之前")
 
-    shuffled = list(args.model)
-    random.Random(args.seed).shuffle(shuffled)
-    models = dict(zip(CODES, shuffled))
     if args.fake:
         clients = {code: FakeModel(mid) for code, mid in models.items()}
     else:
         clients = {code: OpenRouterClient(mid) for code, mid in models.items()}
 
     ledger = Ledger(args.budget)
-    units = plan_units(ds, scene_ids, models, set(args.adult_model), args.repeats)
+    if orig:
+        units = carried_units(orig, models)
+    else:
+        units = plan_units(ds, scene_ids, models, set(args.adult_model), args.repeats)
     started = datetime.now().astimezone()
-    run_id = started.strftime("%Y%m%d-%H%M%S") + ("-fake" if args.fake else "")
+    run_id = started.strftime("%Y%m%d-%H%M%S") + ("-resume" if orig else "") + ("-fake" if args.fake else "")
     stop_reason = run_units(ds, units, clients, ledger, args.max_tokens, args.backoff, parallel=args.parallel)
+    new_units = [u for u in units if u.carried is None]
 
     out = args.out / run_id
     out.mkdir(parents=True, exist_ok=False)
@@ -195,15 +246,18 @@ def main(argv=None) -> int:
                      "parallel": args.parallel},
         "codes": list(models),
         "adult_codes": [c for c, m in models.items() if m in args.adult_model],
+        "resumed_from": orig["run_id"] if orig else None,
         "ledger": {"budget": args.budget, "spent": round(ledger.spent, 8), "stop_reason": stop_reason},
-        "stats": stats(units),
-        "units": [u.to_dict() for u in units],
+        "stats": stats(new_units),
+        "units": [u.to_dict() for u in new_units],
     }
     (out / "record.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")
-    (out / "blind.html").write_text(render.blind_html(ds, record), encoding="utf-8")
+    # 补跑时盲评页合并原运行沿用的场次与本次补跑的场次，呈现完整的一套
+    (out / "blind.html").write_text(render.blind_html(ds, record | {"units": [u.to_dict() for u in units]}),
+                                    encoding="utf-8")
     key = "模型代号对照（盲评结束前不要打开）\n\n" + "".join(f"{c}\t{m}\n" for c, m in models.items())
     (out / "key.txt").write_text(key, encoding="utf-8")
-    (out / "by-model.json").write_text(json.dumps(stats_by_model(units, models), ensure_ascii=False, indent=2),
+    (out / "by-model.json").write_text(json.dumps(stats_by_model(new_units, models), ensure_ascii=False, indent=2),
                                        encoding="utf-8")
     print(f"总花费 {ledger.spent:.6f} 美元；输出：{out}", file=sys.stderr)
     return 1 if stop_reason else 0

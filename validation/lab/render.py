@@ -1,8 +1,18 @@
 """匿名盲评页：同一场景、不同模型并排；只出现代号，不出现模型 ID。"""
 
 import json
+import re
 
 from dataset import Dataset
+
+# 旧记录的失败事件里带着服务商报错原文（可能含模型 ID），只保留到状态码为止
+_REQUEST_ERROR = re.compile(r"((?:请求失败|服务商拒绝)：(?:HTTP \d+|接口错误|\w+Error))[^（]*")
+
+
+def public_event(e: dict) -> dict:
+    if e.get("kind") == "failure":
+        return e | {"text": _REQUEST_ERROR.sub(r"\1", e["text"])}
+    return e
 
 PAGE = """<!doctype html>
 <html lang="zh-CN">
@@ -186,7 +196,8 @@ def blind_html(ds: Dataset, record: dict) -> str:
         })
     units = [
         {"key": f"{u['scene']}·{u['scale']}", "code": u["code"], "repeat": u["repeat"],
-         "status": u["status"], "reason": u.get("reason"), "events": u["events"]}
+         "status": u["status"], "reason": _REQUEST_ERROR.sub(r"\1", u.get("reason") or "") or None,
+         "events": [public_event(e) for e in u["events"]]}
         for u in record["units"]
     ]
     data = {
