@@ -17,12 +17,28 @@ class EndToEndTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             argv = ["--fake", "--model", "vendor/alpha", "--model", "vendor/beta",
                     "--adult-model", "vendor/beta", "--seed", "7", "--out", tmp]
-            with contextlib.redirect_stderr(io.StringIO()):
+            progress = io.StringIO()
+            with contextlib.redirect_stderr(progress):
                 self.assertEqual(run.main(argv), 0)
             (out,) = Path(tmp).iterdir()
             record = json.loads((out / "record.json").read_text(encoding="utf-8"))
             html = (out / "blind.html").read_text(encoding="utf-8")
             key = (out / "key.txt").read_text(encoding="utf-8")
+            by_model = json.loads((out / "by-model.json").read_text(encoding="utf-8"))
+
+        # 终端进度与盲评页不出现按代号拆分的费用和耗时，只有最后一行总额
+        lines = progress.getvalue().strip().splitlines()
+        self.assertTrue(all("美元" not in l for l in lines[:-1]))
+        self.assertIn("总花费", lines[-1])
+        for word in ("latency", "cost", "spent", "美元"):
+            self.assertNotIn(word, html)
+        # 按模型 ID 汇总的统计里不含代号
+        self.assertEqual(sorted(by_model), ["vendor/alpha", "vendor/beta"])
+        self.assertNotIn("甲", json.dumps(by_model, ensure_ascii=False))
+        self.assertEqual(sum(s["calls"] for s in by_model.values()), record["stats"]["calls"])
+        attempt = record["units"][0]["calls"][0]["attempts"][0]
+        self.assertIn("latency_s", attempt)
+        self.assertIn("reasoning_tokens", attempt["usage"])
 
         units = record["units"]
         # 9 个场景 × 2 个模型 × 2 次，加上 C1 成人向只给一个模型 × 2 次

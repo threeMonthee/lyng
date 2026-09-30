@@ -31,6 +31,11 @@ class MarkupTest(unittest.TestCase):
         self.assertEqual(t.inner, "终于。")
         self.assertFalse(t.silent)
 
+    def test_inner_voice_only_is_silence(self):
+        t = parse_turn("【心声】随他去。")
+        self.assertTrue(t.silent)
+        self.assertEqual(t.beats, ())
+
     def test_multiline_block(self):
         t = parse_turn("【说】第一句。\n第二句。\n【心声】嗯。")
         self.assertEqual(t.beats, (("说", "第一句。\n第二句。"),))
@@ -42,7 +47,8 @@ class MarkupTest(unittest.TestCase):
             "【说】你好。",
             "【心声】嗯。\n【说】你好。",
             "【说】你好。\n【心声】嗯。\n【心声】又一句。",
-            "【不开口】\n【说】你好。\n【心声】嗯。",
+            "【不开口】\n【心声】嗯。",
+            "【心声】",
             "【想】你好。\n【心声】嗯。",
             "【说】\n【心声】嗯。",
         ):

@@ -76,7 +76,7 @@ class TechnicalFailureTest(unittest.TestCase):
         self.assertEqual([e.kind for e in result.events], ["failure"])
 
     def test_explicit_silence_is_not_failure(self):
-        _, result = run_a1(first_character_call([ok("【不开口】\n【心声】随他去。")]))
+        _, result = run_a1(first_character_call([ok("【心声】随他去。")]))
         call = next(c for c in result.calls if c.kind == "character")
         self.assertEqual(call.outcome, "ok")
         silent = [e for e in result.events if e.kind == "character" and e.silent]

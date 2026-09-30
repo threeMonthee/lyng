@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import random
+import statistics
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -43,7 +44,7 @@ def parse_args(argv):
     p.add_argument("--scenes", default="all", help="逗号分隔的场景编号，默认全部")
     p.add_argument("--repeats", type=int, default=2, help="每个模型每个场景跑几次，默认 2")
     p.add_argument("--budget", type=float, help="本次运行的费用硬上限（美元）；真实调用时必填")
-    p.add_argument("--max-tokens", type=int, default=2000, help="每次调用的输出上限")
+    p.add_argument("--max-tokens", type=int, default=8000, help="每次调用的输出上限（含推理 token）")
     p.add_argument("--backoff", type=float, default=10.0, help="429 / 5xx 后重试前等待的秒数")
     p.add_argument("--fake", action="store_true", help="使用确定性模型替身，不发任何网络请求")
     p.add_argument("--seed", type=int, help="代号分配的随机种子；默认随机")
@@ -98,15 +99,21 @@ def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object]
         u.result = SceneRun(ds, scene, u.scale, clients[u.code], ledger, max_tokens, previous, backoff, sleep).run()
         u.status, u.reason = u.result.status, u.result.reason
         done[(u.code, u.repeat, u.scene, u.scale)] = u
-        print(f"[{u.code}] {u.scene}·{u.scale}·第{u.repeat}次：{u.status}  累计 {ledger.spent:.6f} 美元", file=sys.stderr)
+        # 不打印按代号拆分的费用与耗时：单价差异会让人从费用反推出代号对应的模型
+        print(f"[{u.code}] {u.scene}·{u.scale}·第{u.repeat}次：{u.status}", file=sys.stderr)
         if u.status == "stopped":
             stop_reason = u.reason
     return stop_reason
 
 
+def _median(values: list) -> float | None:
+    return statistics.median(values) if values else None
+
+
 def stats(units: list[Unit]) -> dict:
     calls = [c for u in units if u.result for c in u.result.calls]
     outcomes = [c.outcome for c in calls]
+    attempts = [a for c in calls for a in c.attempts]
     return {
         "calls": len(calls),
         "first_attempt_ok": outcomes.count("ok"),
@@ -115,8 +122,18 @@ def stats(units: list[Unit]) -> dict:
         "final_failed": outcomes.count("failed"),
         "refused": outcomes.count("refused"),
         "stopped": outcomes.count("stopped"),
+        "final_failed_rate": round(outcomes.count("failed") / len(calls), 4) if calls else None,
         "units": {s: sum(1 for u in units if u.status == s) for s in ("completed", "failed", "refused", "stopped", "not_run")},
+        "spent": round(sum(u.result.spent for u in units if u.result), 8),
+        "median_latency_s": _median([a["latency_s"] for a in attempts if a.get("latency_s") is not None]),
+        "median_reasoning_tokens": _median([a["usage"]["reasoning_tokens"] for a in attempts
+                                            if (a.get("usage") or {}).get("reasoning_tokens") is not None]),
     }
+
+
+def stats_by_model(units: list[Unit], models: dict[str, str]) -> dict:
+    """按模型 ID 汇总，不含代号。"""
+    return {mid: stats([u for u in units if u.code == code]) for code, mid in sorted(models.items(), key=lambda kv: kv[1])}
 
 
 def main(argv=None) -> int:
@@ -164,7 +181,9 @@ def main(argv=None) -> int:
     (out / "blind.html").write_text(render.blind_html(ds, record), encoding="utf-8")
     key = "模型代号对照（盲评结束前不要打开）\n\n" + "".join(f"{c}\t{m}\n" for c, m in models.items())
     (out / "key.txt").write_text(key, encoding="utf-8")
-    print(f"输出：{out}", file=sys.stderr)
+    (out / "by-model.json").write_text(json.dumps(stats_by_model(units, models), ensure_ascii=False, indent=2),
+                                       encoding="utf-8")
+    print(f"总花费 {ledger.spent:.6f} 美元；输出：{out}", file=sys.stderr)
     return 1 if stop_reason else 0
 
 

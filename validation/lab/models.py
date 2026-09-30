@@ -110,7 +110,10 @@ def parse_response(payload: dict) -> Completion:
         text=text,
         finish_reason=choice.get("finish_reason"),
         cost=float(cost) if isinstance(cost, (int, float)) else None,
-        usage={k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens") if k in usage},
+        usage={
+            **{k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens") if k in usage},
+            "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+        },
     )
 
 
@@ -138,9 +141,9 @@ class FakeModel:
         elif kind == "character":
             name = purpose["name"]
             if n % 5 == 0:
-                text = f"【不开口】\n【心声】（{name}的替身心声 {n}）"
+                text = f"【心声】（{name}的替身心声 {n}）"
             else:
                 text = f"【行】{name}抬眼看了一下。\n【说】（{name}的替身台词 {n}）\n【心声】（{name}的替身心声 {n}）"
         else:
             raise ValueError(f"未知调用：{kind}")
-        return Completion(text, "stop", self.cost_per_call, {"prompt_tokens": 0, "completion_tokens": 0})
+        return Completion(text, "stop", self.cost_per_call, {"prompt_tokens": 0, "completion_tokens": 0, "reasoning_tokens": None})

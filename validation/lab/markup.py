@@ -38,7 +38,8 @@ def _blocks(text: str, allowed: set[str]) -> list[tuple[str, str]]:
 
 
 def parse_turn(text: str) -> Turn:
-    blocks = _blocks(text, {"行", "说", "心声", "不开口"})
+    """【行】【说】可有可无，【心声】必写且在最后；只有【心声】就是此刻不说也不做。"""
+    blocks = _blocks(text, {"行", "说", "心声"})
     tags = [t for t, _ in blocks]
     if tags.count("心声") != 1 or tags[-1] != "心声":
         raise FormatError("【心声】必须恰好一次且放在最后")
@@ -46,15 +47,9 @@ def parse_turn(text: str) -> Turn:
     if not inner:
         raise FormatError("【心声】为空")
     body = blocks[:-1]
-    if [t for t, _ in body] == ["不开口"]:
-        if body[0][1]:
-            raise FormatError("【不开口】后面不应有文字")
-        return Turn((), inner, True)
-    if not body or any(t == "不开口" for t, _ in body):
-        raise FormatError("要么写【行】/【说】，要么只写【不开口】")
     if any(not b for _, b in body):
         raise FormatError("【行】或【说】为空")
-    return Turn(tuple(body), inner, False)
+    return Turn(tuple(body), inner, not body)
 
 
 def parse_narration(text: str) -> str:

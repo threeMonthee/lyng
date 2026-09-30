@@ -50,6 +50,12 @@ class OpenRouterTest(unittest.TestCase):
         self.assertEqual(comp.finish_reason, "stop")
         self.assertEqual(comp.usage["total_tokens"], 15)
 
+    def test_reasoning_tokens(self):
+        p = payload()
+        p["usage"]["completion_tokens_details"] = {"reasoning_tokens": 321}
+        self.assertEqual(parse_response(p).usage["reasoning_tokens"], 321)
+        self.assertIsNone(parse_response(payload()).usage["reasoning_tokens"])
+
     def test_missing_cost_is_none(self):
         self.assertIsNone(parse_response(payload(cost=None)).cost)
 

@@ -97,10 +97,12 @@ class SceneRun:
             except RunStop:
                 rec.outcome = "stopped"
                 raise
+            started = time.monotonic()
             try:
                 comp = self.client.complete(messages, self.max_tokens, purpose)
             except RequestError as e:
-                rec.attempts.append({"error": f"请求失败：{e}", "status": e.status, "kind": e.kind, "cost": None})
+                rec.attempts.append({"error": f"请求失败：{e}", "status": e.status, "kind": e.kind, "cost": None,
+                                     "latency_s": round(time.monotonic() - started, 3)})
                 if e.kind == TRANSIENT:
                     if attempt == 0:
                         self.sleep(self.backoff)
@@ -111,7 +113,8 @@ class SceneRun:
                 assert e.kind == FATAL
                 rec.outcome = "stopped"
                 raise RunStop(f"请求失败：{e}") from e
-            att = {"text": comp.text, "finish_reason": comp.finish_reason, "cost": comp.cost, "usage": comp.usage}
+            att = {"text": comp.text, "finish_reason": comp.finish_reason, "cost": comp.cost, "usage": comp.usage,
+                   "latency_s": round(time.monotonic() - started, 3)}
             rec.attempts.append(att)
             if comp.cost is None:
                 att["error"] = "接口未返回费用"
