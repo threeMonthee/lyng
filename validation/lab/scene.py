@@ -7,6 +7,7 @@
 
 import hashlib
 import json
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 
@@ -28,20 +29,33 @@ class SceneRefused(Exception):
 
 
 class Ledger:
-    """按接口返回的实际费用累计。每次调用前检查，已花费达到上限就停。"""
+    """按接口返回的实际费用累计。每次调用前检查，已花费达到上限或整次运行已停止就停。
+
+    按模型并行时各线程共用一个账目；并行时最多超出“线程数 × 一次调用”的费用。
+    """
 
     def __init__(self, budget: float):
         if budget <= 0:
             raise ValueError("预算上限必须大于 0")
         self.budget = budget
         self.spent = 0.0
+        self.halted: str | None = None
+        self._lock = threading.Lock()
 
     def check(self) -> None:
-        if self.spent >= self.budget:
-            raise RunStop(f"已达预算上限 {self.budget} 美元（已花 {self.spent:.6f}）")
+        with self._lock:
+            if self.halted:
+                raise RunStop(f"运行已停止：{self.halted}")
+            if self.spent >= self.budget:
+                raise RunStop(f"已达预算上限 {self.budget} 美元（已花 {self.spent:.6f}）")
 
     def charge(self, cost: float) -> None:
-        self.spent += cost
+        with self._lock:
+            self.spent += cost
+
+    def halt(self, reason: str) -> None:
+        with self._lock:
+            self.halted = self.halted or reason
 
 
 @dataclass
@@ -155,14 +169,14 @@ class SceneRun:
         return refused
 
     def run(self) -> SceneResult:
-        start = self.ledger.spent
         try:
             status, reason = self._run()
         except SceneRefused as e:
             status, reason = "refused", str(e)
         except RunStop as e:
             status, reason = "stopped", str(e)
-        return SceneResult(self.scene.id, self.scale, status, reason, self.events, self.calls, self.ledger.spent - start)
+        spent = sum(a["cost"] for c in self.calls for a in c.attempts if a.get("cost"))
+        return SceneResult(self.scene.id, self.scale, status, reason, self.events, self.calls, spent)
 
     def _run(self) -> tuple[str, str | None]:
         ds, scene, scale = self.ds, self.scene, self.scale

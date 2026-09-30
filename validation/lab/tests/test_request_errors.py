@@ -6,6 +6,8 @@
 
 import contextlib
 import io
+import threading
+import time
 import unittest
 
 from tests.support import DS, RecordingFake, ok
@@ -156,6 +158,47 @@ class FatalErrorTest(unittest.TestCase):
         units, clients, stop = self.run_all(Completion("【说】嗯。\n【心声】好。", "stop", None))
         self.assert_run_stopped(units, clients, stop)
         self.assertIn("未返回费用", stop)
+
+
+class ParallelRunTest(unittest.TestCase):
+    def test_parallel_completes_everything(self):
+        models = {"甲": "m1", "乙": "m2", "丙": "m3"}
+        units = run.plan_units(DS, list(DS.scenes), models, {"m3"}, 2)
+        clients = {c: RecordingFake() for c in models}
+        ledger = Ledger(10.0)
+        with contextlib.redirect_stderr(io.StringIO()):
+            stop = run.run_units(DS, units, clients, ledger, 1000, sleep=Sleeps(), parallel=True)
+        self.assertIsNone(stop)
+        self.assertTrue(all(u.status == "completed" for u in units))
+        self.assertAlmostEqual(ledger.spent, sum(u.result.spent for u in units))
+
+    def test_fatal_error_in_one_model_stops_the_others(self):
+        models = {"甲": "m1", "乙": "m2"}
+        units = run.plan_units(DS, ["A1", "A2", "A4"], models, set(), 1)
+        ledger = Ledger(10.0)
+
+        started = threading.Event()
+
+        def fail(purpose, n):
+            started.wait(5)  # 等乙发出第一次调用，确保乙是被“中途叫停”的
+            raise RequestError(FATAL, "HTTP 402：no credits", 402)
+
+        def wait_for_halt(purpose, n):
+            if n == 1:
+                started.set()
+                deadline = time.monotonic() + 5
+                while not ledger.halted and time.monotonic() < deadline:
+                    time.sleep(0.01)
+            return None
+
+        clients = {"甲": RecordingFake(fail), "乙": RecordingFake(wait_for_halt)}
+        with contextlib.redirect_stderr(io.StringIO()):
+            stop = run.run_units(DS, units, clients, ledger, 1000, sleep=Sleeps(), parallel=True)
+        self.assertIn("402", stop)
+        by_code = {c: [u.status for u in units if u.code == c] for c in models}
+        self.assertEqual(by_code["甲"], ["stopped", "not_run", "not_run"])
+        self.assertEqual(by_code["乙"], ["stopped", "not_run", "not_run"])
+        self.assertEqual(len(clients["乙"].log), 1)
 
 
 if __name__ == "__main__":

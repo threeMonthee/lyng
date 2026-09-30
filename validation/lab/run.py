@@ -6,6 +6,7 @@ import json
 import random
 import statistics
 import sys
+import threading
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -48,6 +49,7 @@ def parse_args(argv):
     p.add_argument("--backoff", type=float, default=10.0, help="429 / 5xx 后重试前等待的秒数")
     p.add_argument("--fake", action="store_true", help="使用确定性模型替身，不发任何网络请求")
     p.add_argument("--seed", type=int, help="代号分配的随机种子；默认随机")
+    p.add_argument("--parallel", action="store_true", help="每个模型一个线程并行跑；同一模型内仍按顺序")
     p.add_argument("--out", type=Path, default=LAB_DIR / "runs", help="输出根目录")
     args = p.parse_args(argv)
     if len(set(args.model)) != len(args.model):
@@ -79,12 +81,32 @@ def plan_units(ds: dataset.Dataset, scene_ids: list[str], models: dict[str, str]
 
 
 def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object], ledger: Ledger, max_tokens: int,
-              backoff: float = 10.0, sleep=None) -> str | None:
+              backoff: float = 10.0, sleep=None, parallel: bool = False) -> str | None:
+    """跑全部场次，返回整次运行停止的原因（没有停止则为 None）。
+
+    parallel 时每个模型一个线程，同一模型的场次仍按原顺序依次跑；一处停止，其余线程在下一次调用前停下。
+    """
+    if not parallel:
+        _run_sequence(ds, units, clients, ledger, max_tokens, backoff, sleep)
+        return ledger.halted
+    threads = [
+        threading.Thread(target=_run_sequence, args=(ds, [u for u in units if u.code == code], clients, ledger,
+                                                     max_tokens, backoff, sleep))
+        for code in dict.fromkeys(u.code for u in units)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    return ledger.halted
+
+
+def _run_sequence(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object], ledger: Ledger,
+                  max_tokens: int, backoff: float, sleep) -> None:
     done: dict[tuple, Unit] = {}
-    stop_reason = None
     for u in units:
-        if stop_reason:
-            u.reason = f"运行已停止：{stop_reason}"
+        if ledger.halted:
+            u.reason = f"运行已停止：{ledger.halted}"
             continue
         scene = ds.scenes[u.scene]
         previous = None
@@ -100,10 +122,9 @@ def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object]
         u.status, u.reason = u.result.status, u.result.reason
         done[(u.code, u.repeat, u.scene, u.scale)] = u
         # 不打印按代号拆分的费用与耗时：单价差异会让人从费用反推出代号对应的模型
-        print(f"[{u.code}] {u.scene}·{u.scale}·第{u.repeat}次：{u.status}", file=sys.stderr)
+        print(f"[{u.code}] {u.scene}·{u.scale}·第{u.repeat}次：{u.status}", file=sys.stderr, flush=True)
         if u.status == "stopped":
-            stop_reason = u.reason
-    return stop_reason
+            ledger.halt(u.reason)
 
 
 def _median(values: list) -> float | None:
@@ -159,7 +180,7 @@ def main(argv=None) -> int:
     units = plan_units(ds, scene_ids, models, set(args.adult_model), args.repeats)
     started = datetime.now().astimezone()
     run_id = started.strftime("%Y%m%d-%H%M%S") + ("-fake" if args.fake else "")
-    stop_reason = run_units(ds, units, clients, ledger, args.max_tokens, args.backoff)
+    stop_reason = run_units(ds, units, clients, ledger, args.max_tokens, args.backoff, parallel=args.parallel)
 
     out = args.out / run_id
     out.mkdir(parents=True, exist_ok=False)
@@ -170,7 +191,8 @@ def main(argv=None) -> int:
         "fake": args.fake,
         "dataset": {"version": "v1", "sha256": ds.digest},
         "prompt_sha256": hashlib.sha256((LAB_DIR / "prompts.py").read_bytes()).hexdigest(),
-        "settings": {"scenes": scene_ids, "repeats": args.repeats, "max_tokens": args.max_tokens, "backoff": args.backoff},
+        "settings": {"scenes": scene_ids, "repeats": args.repeats, "max_tokens": args.max_tokens, "backoff": args.backoff,
+                     "parallel": args.parallel},
         "codes": list(models),
         "adult_codes": [c for c, m in models.items() if m in args.adult_model],
         "ledger": {"budget": args.budget, "spent": round(ledger.spent, 8), "stop_reason": stop_reason},
