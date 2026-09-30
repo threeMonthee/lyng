@@ -40,3 +40,7 @@ coverage/
 
 ### Claude Code local settings ###
 .claude/settings.local.json
+
+### Validation lab ###
+__pycache__/
+validation/lab/runs/*-fake/
