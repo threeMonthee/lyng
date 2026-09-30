@@ -1,23 +1,29 @@
 """一场戏的循环：叙事者开场 → 按脚本逐轮（用户输入 → 叙事者幕后决定 → 人物反应）→ 叙事者收尾。
 
-技术失败（空响应、截断、格式不合规）只重试一次，最终失败记成失败事件，绝不当作人物沉默。
-拿不到费用或到达预算上限时抛 RunStop，整次运行立即停止。
+技术失败（空响应、截断、格式不合规，以及 429 / 5xx）只重试一次，最终失败记成失败事件，绝不当作人物沉默。
+服务商因内容审核拒绝时抛 SceneRefused，只作废当前场景版本。
+401、402、其他请求错误、拿不到费用或到达预算上限时抛 RunStop，整次运行立即停止。
 """
 
 import hashlib
 import json
+import time
 from dataclasses import asdict, dataclass, field
 
 import prompts
 from dataset import Dataset, Scene, Step
 from events import Event
 from markup import FormatError, parse_consent, parse_narration, parse_round, parse_turn
-from models import TransportError
+from models import FATAL, REFUSED, TRANSIENT, RequestError
 
-FINISH_ERRORS = {"length": "截断", "content_filter": "内容过滤", "error": "生成出错"}
+FINISH_ERRORS = {"length": "截断", "error": "生成出错"}
 
 
 class RunStop(Exception):
+    pass
+
+
+class SceneRefused(Exception):
     pass
 
 
@@ -45,14 +51,14 @@ class CallRecord:
     speaker: str | None
     prompt_sha256: str
     attempts: list[dict] = field(default_factory=list)
-    outcome: str = "failed"  # ok | recovered | failed | stopped
+    outcome: str = "failed"  # ok | recovered | failed | refused | stopped
 
 
 @dataclass
 class SceneResult:
     scene: str
     scale: str
-    status: str  # completed | failed | stopped
+    status: str  # completed | failed | refused | stopped
     reason: str | None
     events: list[Event]
     calls: list[CallRecord]
@@ -72,10 +78,11 @@ class SceneResult:
 
 class SceneRun:
     def __init__(self, ds: Dataset, scene: Scene, scale: str, client, ledger: Ledger, max_tokens: int,
-                 previous: list[Event] | None = None):
+                 previous: list[Event] | None = None, backoff: float = 10.0, sleep=None):
         self.ds, self.scene, self.scale = ds, scene, scale
         self.client, self.ledger, self.max_tokens = client, ledger, max_tokens
         self.previous = previous
+        self.backoff, self.sleep = backoff, time.sleep if sleep is None else sleep
         self.events: list[Event] = []
         self.calls: list[CallRecord] = []
         self.round = 0
@@ -92,10 +99,18 @@ class SceneRun:
                 raise
             try:
                 comp = self.client.complete(messages, self.max_tokens, purpose)
-            except TransportError as e:
-                rec.attempts.append({"error": f"请求失败：{e}", "cost": None})
+            except RequestError as e:
+                rec.attempts.append({"error": f"请求失败：{e}", "status": e.status, "kind": e.kind, "cost": None})
+                if e.kind == TRANSIENT:
+                    if attempt == 0:
+                        self.sleep(self.backoff)
+                    continue
+                if e.kind == REFUSED:
+                    rec.outcome = "refused"
+                    raise SceneRefused(f"服务商拒绝：{e}") from e
+                assert e.kind == FATAL
                 rec.outcome = "stopped"
-                raise RunStop(f"请求失败，拿不到费用：{e}") from e
+                raise RunStop(f"请求失败：{e}") from e
             att = {"text": comp.text, "finish_reason": comp.finish_reason, "cost": comp.cost, "usage": comp.usage}
             rec.attempts.append(att)
             if comp.cost is None:
@@ -103,6 +118,10 @@ class SceneRun:
                 rec.outcome = "stopped"
                 raise RunStop("接口未返回费用")
             self.ledger.charge(comp.cost)
+            if comp.finish_reason == "content_filter":
+                att["error"] = "服务商内容过滤"
+                rec.outcome = "refused"
+                raise SceneRefused("服务商拒绝：内容过滤（finish_reason=content_filter）")
 
             error = FINISH_ERRORS.get(comp.finish_reason)
             if error is None and not comp.text.strip():
@@ -136,6 +155,8 @@ class SceneRun:
         start = self.ledger.spent
         try:
             status, reason = self._run()
+        except SceneRefused as e:
+            status, reason = "refused", str(e)
         except RunStop as e:
             status, reason = "stopped", str(e)
         return SceneResult(self.scene.id, self.scale, status, reason, self.events, self.calls, self.ledger.spent - start)

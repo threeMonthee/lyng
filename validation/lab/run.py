@@ -44,6 +44,7 @@ def parse_args(argv):
     p.add_argument("--repeats", type=int, default=2, help="每个模型每个场景跑几次，默认 2")
     p.add_argument("--budget", type=float, help="本次运行的费用硬上限（美元）；真实调用时必填")
     p.add_argument("--max-tokens", type=int, default=2000, help="每次调用的输出上限")
+    p.add_argument("--backoff", type=float, default=10.0, help="429 / 5xx 后重试前等待的秒数")
     p.add_argument("--fake", action="store_true", help="使用确定性模型替身，不发任何网络请求")
     p.add_argument("--seed", type=int, help="代号分配的随机种子；默认随机")
     p.add_argument("--out", type=Path, default=LAB_DIR / "runs", help="输出根目录")
@@ -76,7 +77,8 @@ def plan_units(ds: dataset.Dataset, scene_ids: list[str], models: dict[str, str]
     return units
 
 
-def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object], ledger: Ledger, max_tokens: int) -> str | None:
+def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object], ledger: Ledger, max_tokens: int,
+              backoff: float = 10.0, sleep=None) -> str | None:
     done: dict[tuple, Unit] = {}
     stop_reason = None
     for u in units:
@@ -93,7 +95,7 @@ def run_units(ds: dataset.Dataset, units: list[Unit], clients: dict[str, object]
                 u.reason = f"依赖的 {scene.previous} 同次运行未完成"
                 continue
             previous = prev.result.events
-        u.result = SceneRun(ds, scene, u.scale, clients[u.code], ledger, max_tokens, previous).run()
+        u.result = SceneRun(ds, scene, u.scale, clients[u.code], ledger, max_tokens, previous, backoff, sleep).run()
         u.status, u.reason = u.result.status, u.result.reason
         done[(u.code, u.repeat, u.scene, u.scale)] = u
         print(f"[{u.code}] {u.scene}·{u.scale}·第{u.repeat}次：{u.status}  累计 {ledger.spent:.6f} 美元", file=sys.stderr)
@@ -111,8 +113,9 @@ def stats(units: list[Unit]) -> dict:
         "first_attempt_failed": sum(1 for c in calls if c.attempts and "error" in c.attempts[0]),
         "recovered": outcomes.count("recovered"),
         "final_failed": outcomes.count("failed"),
+        "refused": outcomes.count("refused"),
         "stopped": outcomes.count("stopped"),
-        "units": {s: sum(1 for u in units if u.status == s) for s in ("completed", "failed", "stopped", "not_run")},
+        "units": {s: sum(1 for u in units if u.status == s) for s in ("completed", "failed", "refused", "stopped", "not_run")},
     }
 
 
@@ -139,7 +142,7 @@ def main(argv=None) -> int:
     units = plan_units(ds, scene_ids, models, set(args.adult_model), args.repeats)
     started = datetime.now().astimezone()
     run_id = started.strftime("%Y%m%d-%H%M%S") + ("-fake" if args.fake else "")
-    stop_reason = run_units(ds, units, clients, ledger, args.max_tokens)
+    stop_reason = run_units(ds, units, clients, ledger, args.max_tokens, args.backoff)
 
     out = args.out / run_id
     out.mkdir(parents=True, exist_ok=False)
@@ -150,7 +153,7 @@ def main(argv=None) -> int:
         "fake": args.fake,
         "dataset": {"version": "v1", "sha256": ds.digest},
         "prompt_sha256": hashlib.sha256((LAB_DIR / "prompts.py").read_bytes()).hexdigest(),
-        "settings": {"scenes": scene_ids, "repeats": args.repeats, "max_tokens": args.max_tokens},
+        "settings": {"scenes": scene_ids, "repeats": args.repeats, "max_tokens": args.max_tokens, "backoff": args.backoff},
         "codes": list(models),
         "adult_codes": [c for c, m in models.items() if m in args.adult_model],
         "ledger": {"budget": args.budget, "spent": round(ledger.spent, 8), "stop_reason": stop_reason},

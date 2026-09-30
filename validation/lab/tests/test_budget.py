@@ -7,7 +7,7 @@ import unittest
 from tests.support import DS, RecordingFake
 
 import run
-from models import Completion, TransportError
+from models import FATAL, Completion, RequestError
 from scene import Ledger, RunStop, SceneRun
 
 
@@ -30,9 +30,9 @@ class BudgetTest(unittest.TestCase):
         self.assertIn("未返回费用", result.reason)
         self.assertEqual(len(model.log), 1)
 
-    def test_stops_on_transport_error(self):
+    def test_stops_on_network_error(self):
         def hook(p, n):
-            raise TransportError("HTTP 500")
+            raise RequestError(FATAL, "URLError：连接被重置")
 
         model = RecordingFake(hook)
         result = SceneRun(DS, DS.scenes["A1"], "含蓄", model, Ledger(1.0), 1000).run()

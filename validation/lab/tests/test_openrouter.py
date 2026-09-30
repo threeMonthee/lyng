@@ -9,7 +9,7 @@ from unittest import mock
 
 from tests.support import DS  # noqa: F401  (确保 sys.path)
 
-from models import OpenRouterClient, TransportError, parse_response
+from models import FATAL, REFUSED, TRANSIENT, OpenRouterClient, RequestError, classify, parse_response
 
 
 def payload(content="【叙事】夜。", finish="stop", cost=0.00123):
@@ -57,8 +57,27 @@ class OpenRouterTest(unittest.TestCase):
         self.assertEqual(parse_response(payload(content=None)).text, "")
 
     def test_error_payload_raises(self):
-        with self.assertRaises(TransportError):
+        with self.assertRaises(RequestError) as ctx:
             parse_response({"error": {"code": 400, "message": "bad"}})
+        self.assertEqual(ctx.exception.kind, FATAL)
+
+    def test_error_payload_moderation_is_refusal(self):
+        err = {"code": 403, "message": "Input was flagged", "metadata": {"reasons": ["sexual"]}}
+        with self.assertRaises(RequestError) as ctx:
+            parse_response({"error": err})
+        self.assertEqual(ctx.exception.kind, REFUSED)
+
+    def test_classify(self):
+        moderation = {"message": "flagged", "metadata": {"reasons": ["sexual"], "flagged_input": "..."}}
+        self.assertEqual(classify(429, None), TRANSIENT)
+        self.assertEqual(classify(500, None), TRANSIENT)
+        self.assertEqual(classify(503, {}), TRANSIENT)
+        self.assertEqual(classify(403, moderation), REFUSED)
+        self.assertEqual(classify(403, {"message": "Forbidden"}), FATAL)
+        self.assertEqual(classify(401, None), FATAL)
+        self.assertEqual(classify(402, None), FATAL)
+        self.assertEqual(classify(400, None), FATAL)
+        self.assertEqual(classify(None, None), FATAL)
 
     def test_complete_sends_request(self):
         c = OpenRouterClient("vendor/model", api_key="secret")
@@ -75,15 +94,36 @@ class OpenRouterTest(unittest.TestCase):
         self.assertNotIn("purpose", seen["body"])
         self.assertEqual(comp.cost, 0.00123)
 
-    def test_http_error_raises_transport_error(self):
+    def http_error(self, code, body):
         c = OpenRouterClient("vendor/model", api_key="k")
 
         def fail(req, timeout):
-            raise urllib.error.HTTPError(req.full_url, 429, "rate", {}, io.BytesIO(b"slow down"))
+            raise urllib.error.HTTPError(req.full_url, code, "err", {}, io.BytesIO(body.encode()))
 
         with mock.patch("urllib.request.urlopen", fail):
-            with self.assertRaises(TransportError):
+            with self.assertRaises(RequestError) as ctx:
                 c.complete([], 100, {"kind": "opening"})
+        self.assertEqual(ctx.exception.status, code)
+        return ctx.exception.kind
+
+    def test_http_errors_are_classified(self):
+        self.assertEqual(self.http_error(429, "slow down"), TRANSIENT)
+        self.assertEqual(self.http_error(502, "bad gateway"), TRANSIENT)
+        self.assertEqual(self.http_error(401, '{"error":{"code":401,"message":"no auth"}}'), FATAL)
+        self.assertEqual(self.http_error(402, '{"error":{"code":402,"message":"no credits"}}'), FATAL)
+        moderation = '{"error":{"code":403,"message":"flagged","metadata":{"reasons":["violence"]}}}'
+        self.assertEqual(self.http_error(403, moderation), REFUSED)
+
+    def test_network_error_is_fatal(self):
+        c = OpenRouterClient("vendor/model", api_key="k")
+
+        def fail(req, timeout):
+            raise urllib.error.URLError("reset")
+
+        with mock.patch("urllib.request.urlopen", fail):
+            with self.assertRaises(RequestError) as ctx:
+                c.complete([], 100, {"kind": "opening"})
+        self.assertEqual(ctx.exception.kind, FATAL)
 
 
 if __name__ == "__main__":

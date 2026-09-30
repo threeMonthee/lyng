@@ -74,7 +74,7 @@ details pre { white-space: pre-wrap; font: inherit; font-size: 13px; margin: 8px
 <script id="data" type="application/json">__DATA__</script>
 <script>
 const DATA = JSON.parse(document.getElementById("data").textContent);
-const STATUS = { failed: "技术失败", stopped: "运行中止", not_run: "未执行" };
+const STATUS = { failed: "技术失败", refused: "服务商拒绝", stopped: "运行中止", not_run: "未执行" };
 let cur = { key: DATA.variants[0] && DATA.variants[0].key, repeat: 1 };
 
 function el(tag, cls, text) {

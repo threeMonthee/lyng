@@ -13,8 +13,40 @@ from dataclasses import dataclass, field
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
-class TransportError(RuntimeError):
-    """请求没有拿到正常响应，也就无法确认费用。"""
+TRANSIENT = "transient"  # 429、5xx：退避后重试一次，仍失败记为技术失败
+REFUSED = "refused"  # 服务商内容审核拒绝：作废当前场景版本
+FATAL = "fatal"  # 401、402、其他错误、拿不到响应：整次运行停止
+
+
+class RequestError(RuntimeError):
+    """请求没有拿到正常响应。kind 决定怎么处理，见 classify。"""
+
+    def __init__(self, kind: str, message: str, status: int | None = None):
+        super().__init__(message)
+        self.kind = kind
+        self.status = status
+
+
+def _is_moderation(error: dict) -> bool:
+    meta = error.get("metadata") or {}
+    message = str(error.get("message", "")).lower()
+    return bool(meta.get("reasons") or meta.get("flagged_input")) or "moderation" in message or "flagged" in message
+
+
+def classify(status: int | None, error: dict | None) -> str:
+    if status == 429 or (status is not None and 500 <= status < 600):
+        return TRANSIENT
+    if status == 403 and error and _is_moderation(error):
+        return REFUSED
+    return FATAL
+
+
+def _error_of(body: str) -> dict:
+    try:
+        err = json.loads(body).get("error")
+    except (json.JSONDecodeError, AttributeError):
+        return {}
+    return err if isinstance(err, dict) else {}
 
 
 @dataclass(frozen=True)
@@ -55,17 +87,20 @@ class OpenRouterClient:
             with urllib.request.urlopen(req, timeout=self._timeout) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
-            body = e.read().decode("utf-8", "replace")[:500]
+            body = e.read().decode("utf-8", "replace")
             e.close()
-            raise TransportError(f"HTTP {e.code}：{body}") from e
+            raise RequestError(classify(e.code, _error_of(body)), f"HTTP {e.code}：{body[:500]}", e.code) from e
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
-            raise TransportError(f"{type(e).__name__}：{e}") from e
+            raise RequestError(FATAL, f"{type(e).__name__}：{e}") from e
         return parse_response(payload)
 
 
 def parse_response(payload: dict) -> Completion:
     if "error" in payload and not payload.get("choices"):
-        raise TransportError(f"接口错误：{json.dumps(payload['error'], ensure_ascii=False)[:500]}")
+        error = payload["error"] if isinstance(payload["error"], dict) else {}
+        status = error.get("code") if isinstance(error.get("code"), int) else None
+        detail = json.dumps(payload["error"], ensure_ascii=False)[:500]
+        raise RequestError(classify(status, error), f"接口错误：{detail}", status)
     usage = payload.get("usage") or {}
     cost = usage.get("cost")
     choices = payload.get("choices") or [{}]

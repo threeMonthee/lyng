@@ -2,7 +2,7 @@
 
 import unittest
 
-from tests.support import DS, RecordingFake
+from tests.support import DS, RecordingFake, ok
 
 import prompts
 from scene import Ledger, SceneRun
@@ -66,6 +66,23 @@ class SceneVisibilityTest(unittest.TestCase):
             for prompt in model.prompts_for(kind):
                 for secret in inner["陆雪琪"] + inner["碧瑶"]:
                     self.assertNotIn(secret, prompt)
+
+    def test_narrator_opening_is_public_but_setting_is_not(self):
+        """叙事者写出的开场是场上公开发生的事，人物看得到；用户写给叙事者的开场设定不给人物。"""
+
+        def hook(purpose, n):
+            if purpose["kind"] == "opening":
+                return ok("【叙事】山海苑后院，灯笼在风里晃。石桌上落了一层薄霜。")
+            return None
+
+        model = RecordingFake(hook)
+        SceneRun(DS, DS.scenes["A1"], "含蓄", model, Ledger(1.0), 1000).run()
+        prompts_seen = model.prompts_for("character", "陆雪琪")
+        self.assertTrue(prompts_seen)
+        for prompt in prompts_seen:
+            self.assertIn("叙事：山海苑后院，灯笼在风里晃。石桌上落了一层薄霜。", prompt)
+            self.assertNotIn(DS.scenes["A1"].opening, prompt)
+            self.assertNotIn("院里只剩他们两个。", prompt)
 
     def test_previous_scene_carries_only_own_inner_voice(self):
         a2 = SceneRun(DS, DS.scenes["A2"], "含蓄", RecordingFake(), Ledger(1.0), 1000).run()
