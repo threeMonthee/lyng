@@ -4,7 +4,7 @@
 
 仓库总览见 `README.md`，文档入口见 `docs/README.md`，当前阶段与待裁决事项见 `plan/CURRENT_WORK.md`。
 
-当前阶段是**产品定义**：与用户讨论并成文 `docs/requires.md`、`docs/PROJECT_BIBLE.md`。成文前不写业务代码、不定详细技术方案。新会话“继续”时，先读 `plan/CURRENT_WORK.md`，再读 `docs/reference/` 中与当前话题相关的部分。
+`docs/requires.md` 与 `docs/PROJECT_BIBLE.md` 已于 2026-09-30 定稿。当前阶段是**核心体验验证**：用最薄原型与真实模型盲测验证“人是真的、故事好看”，方案见 `plan/core-validation.md`。验证结论出来前不写产品代码、不定详细技术方案。新会话“继续”时，先读 `plan/CURRENT_WORK.md`，再读 `docs/reference/` 中与当前话题相关的部分。
 
 用户的请求与已确认方向有根本冲突时，先说明影响并给出更简单的建议，只暂停依赖该裁决的改动。提问时一次聚焦少数关键决定，并给出你的推荐。
 
@@ -31,7 +31,7 @@ docs/requires.md
 
 ## 已确认方向（2026-09-30）
 
-详见 `docs/requires.md` 与 `docs/PROJECT_BIBLE.md`（待用户通读定稿）；二者与本节冲突时以二者为准。要点：
+详见 `docs/requires.md` 与 `docs/PROJECT_BIBLE.md`（已定稿）；二者与本节冲突时以二者为准。要点：
 
 - **真实需求**：进入作品世界，遇见喜爱的人物，亲身经历故事（含成人向）；人物要像真人，故事要好看、让人想一直继续。现阶段自用探索，稳定后可能做 C 端，现在不做但不堵路；也借此跟上 AI 发展。
 - **押注模型进步**：框架薄、模型厚；只在边界兜底；盲测集长期保留，新模型出来就重测。
