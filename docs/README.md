@@ -4,13 +4,11 @@
 
 ## 现行文档
 
-草稿，待用户审阅：
+待用户通读定稿：
 
-1. [requires.md](requires.md)：产品最高事实与范围；
-2. [PROJECT_BIBLE.md](PROJECT_BIBLE.md)：领域概念（人物、世界、场景、叙事者、经历）、接管、关系与已确认决定；
+1. [requires.md](requires.md)：真实需求、成功标准与产品原则；
+2. [PROJECT_BIBLE.md](PROJECT_BIBLE.md)：领域概念（你、人物、一场戏、世界与叙事者、时间与记忆）、规则与已确认决定；
 3. 专项设计：按需要新增，不预先铺设。
-
-草稿确认前，已确认的产品方向以 [AGENTS.md](../AGENTS.md) 的「已确认方向」为准。
 
 ## 参考资料（不是约束）
 
