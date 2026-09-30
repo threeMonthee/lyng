@@ -1,0 +1,45 @@
+validation/lab/tests/test_dataset_and_markup.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 34-38,50-51
+validation/lab/tests/snapshots/character_A2_lu.txt
+  s_bac33ba06c4f10::t_b434ccfd39365a 133-134
+validation/lab/tests/snapshots/character_C1_adult.txt
+  s_bac33ba06c4f10::t_b434ccfd39365a 125-126
+validation/lab/prompts.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 45-46
+validation/lab/tests/snapshots/character_A3_lu.txt
+  s_bac33ba06c4f10::t_b434ccfd39365a 136-137
+validation/lab/models.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 113-116,144
+  s_bac33ba06c4f10::t_b434ccfd39365a 149
+validation/lab/run.py
+  s_bac33ba06c4f10::t_42cb38c49ad41a 7,109-112,116,125,127-130,134-138,184-186
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 47,102-103
+validation/lab/tests/test_run.py
+  s_bac33ba06c4f10::t_42cb38c49ad41a 20-21,27-41
+validation/lab/markup.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 41-42,52
+validation/lab/tests/test_failures.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 79
+validation/lab/README.txt
+  s_bac33ba06c4f10::t_a1a416a52e2be2 40,49,51-52,56-57,67
+validation/lab/scene.py
+  s_bac33ba06c4f10::t_9b3368d8d2e49b 100,104-105,116-117
+validation/lab/tests/test_openrouter.py
+  s_bac33ba06c4f10::t_42cb38c49ad41a 53-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "32ce0e14a9be490bb691e6f2be1703e0ecd5b92b",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
