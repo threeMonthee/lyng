@@ -1,0 +1,46 @@
+validation/scenes/C1.txt
+  s_bac33ba06c4f10::t_0eaa24fd8be13a 1-42
+validation/characters/zhang-xiaofan.txt
+  s_bac33ba06c4f10::t_beaa5a1a375160 12
+  s_bac33ba06c4f10::t_58425ce1f9bbf2 1-11,13-41
+validation/scenes/A2.txt
+  s_bac33ba06c4f10::t_6295989ccab292 1-42
+validation/scenes/B1.txt
+  s_bac33ba06c4f10::t_2b38c77a0ff14c 1-38
+validation/scenes/B2.txt
+  s_bac33ba06c4f10::t_2934f33126d214 1-40
+validation/characters/bi-yao.txt
+  s_bac33ba06c4f10::t_faad811704f1dc 1-41
+validation/world.txt
+  s_bac33ba06c4f10::t_723beed2993aca 1-55
+validation/scenes/A1.txt
+  s_bac33ba06c4f10::t_05fb6befebe476 1-44
+validation/scenes/A4.txt
+  s_bac33ba06c4f10::t_b5d2bf08ddc208 1-39
+validation/characters/lu-xueqi.txt
+  s_bac33ba06c4f10::t_2448f8c99092df 1-45
+validation/scenes/A3.txt
+  s_bac33ba06c4f10::t_0cb23e46a21c6b 1-47
+validation/scenes/A5.txt
+  s_bac33ba06c4f10::t_b5e9d6294a0875 1-40
+validation/README.txt
+  s_bac33ba06c4f10::t_577a6c7ada6a7f 1-51
+validation/scenes/B3.txt
+  s_bac33ba06c4f10::t_037b85a717e896 1-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "040ec1c17d11c373aec5dca9e74d1a36e3cdd454",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
