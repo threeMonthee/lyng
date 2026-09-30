@@ -5,7 +5,8 @@
 
 一、文件
 
-world.txt                世界概要
+world.txt                世界概要：人人知道的公共部分，人物和叙事者都能看
+world-narrator.txt       只有叙事者知道的部分：碧瑶已醒、人物心里的感情、不为人知的往事
 characters/lu-xueqi.txt  陆雪琪档案
 characters/zhang-xiaofan.txt  张小凡档案
 characters/bi-yao.txt    碧瑶档案

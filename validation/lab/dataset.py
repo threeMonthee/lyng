@@ -44,7 +44,8 @@ class Scene:
 
 @dataclass
 class Dataset:
-    world: str
+    world: str  # 人人知道的公共部分
+    world_narrator: str  # 只给叙事者的部分
     profiles: dict[str, str]
     scenes: dict[str, Scene] = field(default_factory=dict)
     digest: str = ""
@@ -152,7 +153,7 @@ def parse_scene(text: str) -> Scene:
 def load(data_dir: Path = DATA_DIR) -> Dataset:
     digest = hashlib.sha256()
     files = sorted(
-        [data_dir / "world.txt"]
+        [data_dir / "world.txt", data_dir / "world-narrator.txt"]
         + list((data_dir / "characters").glob("*.txt"))
         + list((data_dir / "scenes").glob("*.txt"))
     )
@@ -160,12 +161,13 @@ def load(data_dir: Path = DATA_DIR) -> Dataset:
         digest.update(f.relative_to(data_dir).as_posix().encode() + b"\0" + f.read_bytes())
 
     world = (data_dir / "world.txt").read_text(encoding="utf-8").strip()
+    world_narrator = (data_dir / "world-narrator.txt").read_text(encoding="utf-8").strip()
     profiles = {}
     for f in sorted((data_dir / "characters").glob("*.txt")):
         text = f.read_text(encoding="utf-8").strip()
         profiles[text.splitlines()[0].strip()] = text
 
-    ds = Dataset(world=world, profiles=profiles, digest=digest.hexdigest())
+    ds = Dataset(world=world, world_narrator=world_narrator, profiles=profiles, digest=digest.hexdigest())
     for f in sorted((data_dir / "scenes").glob("*.txt")):
         scene = parse_scene(f.read_text(encoding="utf-8"))
         if missing := [n for n in scene.present if n not in profiles]:

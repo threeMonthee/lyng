@@ -58,8 +58,13 @@ NARRATOR_SYSTEM = """你是这个世界的叙事者。你不是故事里的人�
 
 这一场里不要裁定任何人物死去或永久失去；需要时换一个不致命的结果。
 
+【世界】里的事人人知道。【只有你知道的事】人物未必知道：不要借叙事替人物说破，也不要让人物凭空知道。
+
 【世界】
 {world}
+
+【只有你知道的事】
+{world_narrator}
 
 【在场的人物】
 {profiles}
@@ -184,6 +189,7 @@ def narrator_system(ds: Dataset, scene: Scene, scale: str) -> str:
         control = f"\n【镜头】\n这一场跟随{scene.follow}。\n"
     return NARRATOR_SYSTEM.format(
         world=ds.world,
+        world_narrator=ds.world_narrator,
         profiles=profiles,
         control=control,
         tone=TONE_TEXT[scene.tone],

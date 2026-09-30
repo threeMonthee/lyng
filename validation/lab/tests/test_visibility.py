@@ -33,6 +33,22 @@ class PromptVisibilityTest(unittest.TestCase):
         text = joined(prompts.character_messages(DS, scene, "含蓄", "陆雪琪", []))
         self.assertNotIn(scene.opening, text)
 
+    def test_character_never_sees_narrator_only_world(self):
+        """只给叙事者的世界设定，不出现在任何场景、任何人物的 Prompt 里；叙事者能看到。"""
+        secrets = [l.strip() for l in DS.world_narrator.splitlines()[1:] if l.strip() and not l.startswith("【")]
+        self.assertGreaterEqual(len(secrets), 5)
+        for scene in DS.scenes.values():
+            narrator = joined(prompts.narrator_opening_messages(DS, scene, "含蓄"))
+            for s in secrets:
+                self.assertIn(s, narrator)
+            for name in scene.ai_characters:
+                for scale in scene.scales:
+                    text = joined(prompts.character_messages(DS, scene, scale, name, A2_EVENTS, A2_EVENTS))
+                    for s in secrets:
+                        self.assertNotIn(s, text, f"{scene.id} {name}")
+                    for phrase in ("原作", "动了心", "放在了心上", "走遍天下", "一个月前，碧瑶醒了"):
+                        self.assertNotIn(phrase, text.replace(DS.profiles[name], ""), f"{scene.id} {name} {phrase}")
+
     def test_technical_failure_is_invisible_not_silence(self):
         text = joined(prompts.character_messages(DS, DS.scenes["A2"], "含蓄", "陆雪琪", A2_EVENTS))
         self.assertNotIn("技术失败", text)
