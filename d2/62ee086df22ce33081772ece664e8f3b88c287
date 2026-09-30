@@ -1,0 +1,27 @@
+validation/lab/tests/test_request_errors.py
+  s_bac33ba06c4f10::t_a96ae05e47a441 10,163-179,182,184-187,189-201
+  s_bac33ba06c4f10::t_41700bb7ad879f 9,180-181,183,188
+  s_bac33ba06c4f10::t_79b7cf2baa620c 202-203
+validation/lab/scene.py
+  s_bac33ba06c4f10::t_d3eac6557676eb 10,32-35,42-43,46-50,53-58,178-179
+validation/lab/run.py
+  s_bac33ba06c4f10::t_d3eac6557676eb 9,52,84-105,108-109,125,127,183,194-195
+validation/lab/README.txt
+  s_bac33ba06c4f10::t_9648e4266dbe7c 43,45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d262ee086df22ce33081772ece664e8f3b88c287",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "unknown"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
