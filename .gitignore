@@ -1,0 +1,42 @@
+### Local configuration and secrets ###
+.env
+.env.*
+!.env.example
+runtime.env
+
+### Logs and runtime data ###
+logs/
+*.log
+.postgres-data/
+
+### Java / Maven / Gradle ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+.gradle/
+.kotlin
+
+### Node / Expo ###
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+*.tsbuildinfo
+**/ios/Pods/
+**/android/.gradle/
+**/android/local.properties
+
+### IDE / OS ###
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings
+.DS_Store
+
+### Claude Code local settings ###
+.claude/settings.local.json
