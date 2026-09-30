@@ -1,0 +1,96 @@
+validation/lab/markup.py
+  s_bac33ba06c4f10::t_45937b17a07ab1 1-91
+validation/lab/tests/test_openrouter.py
+  s_bac33ba06c4f10::t_653c737acbef97 1-90
+validation/lab/render.py
+  s_bac33ba06c4f10::t_5b36fc8135aa0d 1-199
+validation/characters/zhang-xiaofan.txt
+  s_bac33ba06c4f10::t_a3f676c96e6152 6,8,10,17,19-21,26,31-33,38,43,45
+validation/lab/prompts.py
+  s_bac33ba06c4f10::t_c2b51125d0584f 1-236
+validation/lab/tests/test_failures.py
+  s_bac33ba06c4f10::t_7efbb6c7fb5b29 1-87
+validation/scenes/B1.txt
+  s_bac33ba06c4f10::t_bc1785f2f18fff 16-17
+validation/lab/models.py
+  s_bac33ba06c4f10::t_8ad65c64cdb8d9 1-111
+validation/lab/tests/test_budget.py
+  s_bac33ba06c4f10::t_00f56fcb4895ec 1-69
+  s_bac33ba06c4f10::t_dc6dbac516857d 70-72
+validation/lab/tests/test_dataset_and_markup.py
+  s_bac33ba06c4f10::t_9725cb0b4b30b5 1-70
+validation/lab/tests/test_consent.py
+  s_bac33ba06c4f10::t_40fa98fc125035 1-63
+validation/lab/tests/snapshots/narrator_opening_A1.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-190
+validation/lab/README.txt
+  s_bac33ba06c4f10::t_8ad852583042fe 1-87
+validation/lab/tests/snapshots/narrator_closing_A2.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-241
+.gitignore
+  s_bac33ba06c4f10::t_122b6acf5f623c 43-46
+validation/scenes/B2.txt
+  s_bac33ba06c4f10::t_bc1785f2f18fff 18-19
+validation/lab/tests/test_visibility.py
+  s_bac33ba06c4f10::t_eb31472e1001bb 1-85
+validation/scenes/A1.txt
+  s_bac33ba06c4f10::t_bc1785f2f18fff 22-24
+AGENTS.md
+  s_bac33ba06c4f10::t_12ba9f22ff477b 29
+validation/lab/tests/support.py
+  s_bac33ba06c4f10::t_cc002fdb8a2017 1-38
+validation/lab/tests/test_run.py
+  s_bac33ba06c4f10::t_58c749dffd55d8 1-60
+validation/scenes/A2.txt
+  s_bac33ba06c4f10::t_bc1785f2f18fff 20-24
+validation/lab/run.py
+  s_bac33ba06c4f10::t_38042f0c13ad9d 1-169
+validation/README.txt
+  s_bac33ba06c4f10::t_3f5063b3d221e8 3,13,30,33-34,45
+validation/lab/scene.py
+  s_bac33ba06c4f10::t_6e1bc193631f72 1-205
+validation/lab/tests/snapshots/character_C1_adult.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-137
+validation/lab/tests/snapshots/character_A2_lu.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-145
+validation/characters/lu-xueqi.txt
+  s_bac33ba06c4f10::t_422dfeb97634fd 6,8,10,12,17,19-21,26,28,33-35,40,42
+validation/lab/dataset.py
+  s_bac33ba06c4f10::t_b403322cc5a48e 10
+  s_bac33ba06c4f10::t_1a7c9d7c822d9f 1-9,11-177
+validation/lab/tests/snapshots/consent_C1.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-17
+validation/lab/events.py
+  s_bac33ba06c4f10::t_0fc17947a53af8 1-33
+validation/lab/tests/snapshots/narrator_round_A2.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-247
+validation/scenes/C1.txt
+  s_bac33ba06c4f10::t_251444df0a0496 13,18-19,26,29,31,33,39-40
+validation/scenes/A3.txt
+  s_bac33ba06c4f10::t_a9e5174ffbe8bf 19
+  s_bac33ba06c4f10::t_bc1785f2f18fff 18
+validation/lab/tests/test_prompts.py
+  s_bac33ba06c4f10::t_9058b926c92d26 1-74
+validation/lab/tests/snapshots/character_A3_lu.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-148
+validation/lab/tests/snapshots/narrator_round_B3.txt
+  s_bac33ba06c4f10::t_2f09903d372f4f 1-194
+validation/characters/bi-yao.txt
+  s_bac33ba06c4f10::t_88a8888d628f31 6,8,10,17-19,24,29-31,36,43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f312ade382a39908248f4e621814e4c9f6a98a4a",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
