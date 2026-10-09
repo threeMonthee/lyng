@@ -92,14 +92,25 @@ NARRATOR_ROUND_USER = """【这一场到现在】
 【刚刚】
 {latest}
 
-只写下面两行，不写理由，不写别的文字：
+{instructions}"""
+
+NARRATION_RULE = "“叙事：”写世界此刻要不要你出声。大多数时候不要，就写“叙事：无”。只在这些时候出声：环境或时间有了变化，世界里发生了事，或者刚才的动作结果不确定、需要裁定。出声只写一两句，点到为止。递茶、放下东西、牵手这类结果不言自明的动作，以及人物之间说话、沉默的时候，都写“叙事：无”。"
+
+# 双人戏（只有一个 AI 人物）不做调度：她每一轮都能接戏，叙事者只决定要不要出声
+ROUND_PAIR = """只写下面一行，不写理由，不写别的文字：
 叙事：……
-反应：……
 
-“叙事：”写世界此刻要不要你出声。大多数时候不要，就写“叙事：无”。只在这些时候出声：环境或时间有了变化，世界里发生了事，或者刚才的动作结果不确定、需要裁定。出声只写一两句，点到为止。递茶、放下东西、牵手这类结果不言自明的动作，以及人物之间说话、沉默的时候，都写“叙事：无”。
-“反应：”写在场的人物里谁会对刚刚发生的事有反应，按开口的先后写名字，用“、”隔开；没有人就写“反应：无”。已经离开这里、看不到也听不到的人物，不会有反应。你只写名字，他们自己决定怎么反应。可选的人物：{candidates}。{advance}"""
+""" + NARRATION_RULE
 
-ADVANCE_RULE = "\n这一轮要让这一场往前走一段：“叙事：”和“反应：”不能都是“无”。"
+# 群戏由叙事者决定轮到谁
+ROUND_GROUP = """只写下面两行，不写理由，不写别的文字：
+叙事：……
+轮到：……
+
+""" + NARRATION_RULE + """
+“轮到：”写在场的人物里轮到谁对刚刚发生的事作出反应，按先后写名字，用“、”隔开；没有人就写“轮到：无”。已经离开这里、看不到也听不到的人物，不会轮到。你只写名字，他们自己决定说什么、做什么，也可以什么都不做。可选的人物：{candidates}。{advance}"""
+
+ADVANCE_RULE = "\n这一轮要让这一场往前走一段：“叙事：”和“轮到：”不能都是“无”。"
 
 NARRATOR_CLOSING_USER = """【这一场到现在】
 {perception}
@@ -205,12 +216,15 @@ def latest_text(scene: Scene, step: Step) -> str:
 
 
 def narrator_round_messages(ds: Dataset, scene: Scene, scale: str, events: list[Event], step: Step) -> list[dict]:
-    user = NARRATOR_ROUND_USER.format(
-        perception=perceive(events),
-        latest=latest_text(scene, step),
-        candidates="、".join(scene.ai_characters),
-        advance=ADVANCE_RULE if step.kind == "推进" else "",
-    )
+    if len(scene.ai_characters) == 1:
+        instructions = ROUND_PAIR
+    else:
+        instructions = ROUND_GROUP.format(
+            candidates="、".join(scene.ai_characters),
+            advance=ADVANCE_RULE if step.kind == "推进" else "",
+        )
+    user = NARRATOR_ROUND_USER.format(perception=perceive(events), latest=latest_text(scene, step),
+                                      instructions=instructions)
     return [{"role": "system", "content": narrator_system(ds, scene, scale)}, {"role": "user", "content": user}]
 
 

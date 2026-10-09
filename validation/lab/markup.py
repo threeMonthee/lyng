@@ -1,15 +1,15 @@
 """解析模型输出。不合规一律抛 FormatError，由调用方记为技术失败。
 
 输出与感知材料用同一套“标签：内容”写法：人物写“陆雪琪（行）：”“陆雪琪（说）：”“陆雪琪（心声）：”，
-叙事者每轮写“叙事：”“反应：”两行，开场与收尾直接写正文。
+叙事者每轮写“叙事：”（群戏再加“轮到：”），开场与收尾直接写正文。
 v1 的输出用【行】一类标记、感知材料却用“陆雪琪（行）：”，两套写法并存，模型会混用，所以统一。
 """
 
 import re
 from dataclasses import dataclass
 
-# 一行的开头：叙事： / 反应： / 判定： / 名字（行|说|心声）：
-_LABEL = re.compile(r"^(?:(叙事|反应|判定)|([^（）：\s]{1,8})（(行|说|心声)）)：(.*)$")
+# 一行的开头：叙事： / 轮到： / 判定： / 名字（行|说|心声）：
+_LABEL = re.compile(r"^(?:(叙事|轮到|判定)|([^（）：\s]{1,8})（(行|说|心声)）)：(.*)$")
 
 
 class FormatError(ValueError):
@@ -70,21 +70,31 @@ def parse_narration(text: str) -> str:
     return text.strip()
 
 
+def parse_pair_round(text: str) -> str:
+    """双人戏的每一轮：恰好一行“叙事：”，不出声就写“无”。不出声时返回空字符串（None 留给调用失败）。"""
+    lines = _lines(text)
+    if [(n, t) for n, t, _ in lines] != [(None, "叙事")]:
+        raise FormatError("只写一行“叙事：”")
+    if not lines[0][2]:
+        raise FormatError("“叙事：”不能为空；不出声就写“无”")
+    return "" if lines[0][2] == "无" else lines[0][2]
+
+
 def parse_round(text: str, candidates: list[str], require_something: bool) -> tuple[str | None, list[str]]:
-    """叙事者每轮的幕后决定：恰好一行“叙事：”、一行“反应：”，没有就写“无”。"""
+    """群戏的每一轮：恰好一行“叙事：”、一行“轮到：”，没有就写“无”。"""
     lines = _lines(text)
     if any(n is not None for n, _, _ in lines):
-        raise FormatError("叙事者只写“叙事：”“反应：”两行，不写人物的言行")
-    if sorted(t for _, t, _ in lines) != ["反应", "叙事"]:
-        raise FormatError("需要恰好一行“叙事：”和一行“反应：”")
+        raise FormatError("叙事者只写“叙事：”“轮到：”两行，不写人物的言行")
+    if sorted(t for _, t, _ in lines) != ["叙事", "轮到"]:
+        raise FormatError("需要恰好一行“叙事：”和一行“轮到：”")
     body = {t: b for _, t, b in lines}
-    if not body["叙事"] or not body["反应"]:
-        raise FormatError("“叙事：”“反应：”不能为空；没有就写“无”")
+    if not body["叙事"] or not body["轮到"]:
+        raise FormatError("“叙事：”“轮到：”不能为空；没有就写“无”")
     narration = None if body["叙事"] == "无" else body["叙事"]
-    raw = body["反应"].rstrip("。")
+    raw = body["轮到"].rstrip("。")
     names = [] if raw == "无" else [n for n in re.split(r"[、，,\s]+", raw) if n]
     if any(n not in candidates for n in names) or len(set(names)) != len(names):
-        raise FormatError(f"“反应：”只能是 {'、'.join(candidates)} 或“无”，且不重复")
+        raise FormatError(f"“轮到：”只能是 {'、'.join(candidates)} 或“无”，且不重复")
     if require_something and not narration and not names:
         raise FormatError("推进时必须叙事或至少有一人反应")
     return narration, names

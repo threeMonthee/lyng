@@ -144,7 +144,9 @@ class FakeModel:
             text = "判定：未拒绝"
         elif kind == "round":
             narration = f"（替身叙事 {n}）" if purpose["step"] in ("做", "推进") else "无"
-            text = f"叙事：{narration}\n反应：{'、'.join(purpose['candidates']) or '无'}"
+            text = f"叙事：{narration}"
+            if len(purpose["candidates"]) > 1:
+                text += f"\n轮到：{'、'.join(purpose['candidates'])}"
         elif kind == "character":
             name = purpose["name"]
             if n % 5 == 0:

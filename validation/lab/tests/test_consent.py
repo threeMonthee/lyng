@@ -46,12 +46,24 @@ class ConsentGateTest(unittest.TestCase):
             self.assertNotIn("低头吻她", prompt)
             self.assertNotIn("可以吗", prompt)
 
-    def test_consent_check_failure_is_treated_as_refusal(self):
+    def test_consent_check_failure_retries_once_then_aborts_scene(self):
         model, result = run_c1([ok(""), ok("随便写的")])
-        acts = user_actions(result)
-        self.assertEqual({acts[3][0], acts[6][0], acts[8][0]}, {"静候"})
-        failures = [e for e in result.events if e.kind == "failure"]
-        self.assertEqual(failures[0].speaker, "同意检查")
+        self.assertEqual(result.status, "failed")
+        self.assertIn("同意检查", result.reason)
+        consent = [c for c in result.calls if c.kind == "consent"]
+        self.assertEqual(len(consent), 1)
+        self.assertEqual(len(consent[0].attempts), 2)
+        # 中止在第 3 轮执行之前：没有转成静候，也没有后续轮次与收尾
+        self.assertEqual(sorted(user_actions(result)), [1, 2])
+        self.assertFalse([e for e in result.events if e.kind == "note"])
+        self.assertEqual(result.events[-1].kind, "failure")
+        self.assertEqual(result.events[-1].speaker, "同意检查")
+        self.assertEqual(model.log[-1][0]["kind"], "consent")
+
+    def test_consent_check_recovers_on_retry(self):
+        _, result = run_c1([ok(""), ok("判定：未拒绝")])
+        self.assertEqual(result.status, "completed")
+        self.assertEqual(user_actions(result)[3], ("做", "握住她的手。"))
 
     def test_consent_check_sees_her_inner_voice(self):
         model, _ = run_c1([])

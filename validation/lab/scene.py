@@ -14,7 +14,7 @@ from dataclasses import asdict, dataclass, field
 import prompts
 from dataset import Dataset, Scene, Step
 from events import Event
-from markup import FormatError, parse_consent, parse_narration, parse_round, parse_turn
+from markup import FormatError, parse_consent, parse_narration, parse_pair_round, parse_round, parse_turn
 from models import FATAL, REFUSED, TRANSIENT, RequestError
 
 FINISH_ERRORS = {"length": "截断", "error": "生成出错"}
@@ -26,6 +26,10 @@ class RunStop(Exception):
 
 class SceneRefused(Exception):
     pass
+
+
+class SceneAborted(Exception):
+    """技术失败让这个场景版本无法继续，记为技术失败并中止。"""
 
 
 class Ledger:
@@ -166,13 +170,16 @@ class SceneRun:
             parse_consent,
         )
         if refused is None:
-            self._fail("同意检查", "技术失败，按拒绝处理")
-            return True
+            # 不能确认对方是否愿意，就不往前推，也不替她转成静候：这个场景版本作废
+            self._fail("同意检查", "技术失败，场景中止")
+            raise SceneAborted("同意检查技术失败")
         return refused
 
     def run(self) -> SceneResult:
         try:
             status, reason = self._run()
+        except SceneAborted as e:
+            status, reason = "failed", str(e)
         except SceneRefused as e:
             status, reason = "refused", str(e)
         except RunStop as e:
@@ -221,15 +228,27 @@ class SceneRun:
         if step.kind != "推进":
             self.events.append(Event(step.index, "user", speaker=scene.possessed, action=step.kind, text=step.text))
 
+        pair = len(scene.ai_characters) == 1
+        if pair:
+            parse = parse_pair_round
+        else:
+            def parse(t):
+                return parse_round(t, scene.ai_characters, require_something=step.kind == "推进")
         decided = self._call(
             {"kind": "round", "scene": scene.id, "step": step.kind, "candidates": scene.ai_characters},
             prompts.narrator_round_messages(ds, scene, scale, before, step),
-            lambda t: parse_round(t, scene.ai_characters, require_something=step.kind == "推进"),
+            parse,
         )
-        if decided is None:
+        if pair:
+            # 双人戏不做调度：每一轮她都能接戏，叙事者出不出声都不影响
+            if decided is None:
+                self._fail("叙事者", "本轮叙事技术失败")
+            narration, reactors = decided, scene.ai_characters
+        elif decided is None:
             self._fail("叙事者", "本轮幕后决定技术失败，本轮无人反应")
             return
-        narration, reactors = decided
+        else:
+            narration, reactors = decided
         if narration:
             self.events.append(Event(step.index, "narration", text=narration))
         for name in reactors:

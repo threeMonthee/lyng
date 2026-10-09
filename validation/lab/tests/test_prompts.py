@@ -55,6 +55,10 @@ class PromptSnapshotTest(unittest.TestCase):
         step = Step(3, "说", "碧瑶，你先回山海苑，我随后就到。")
         self.check("narrator_round_A2", prompts.narrator_round_messages(DS, DS.scenes["A2"], "含蓄", A2_EVENTS, step))
 
+    def test_narrator_round_pair(self):
+        step = Step(2, "说", "那天夜里伤你师妹的，是这个。")
+        self.check("narrator_round_A1_pair", prompts.narrator_round_messages(DS, DS.scenes["A1"], "含蓄", [], step))
+
     def test_narrator_round_observer(self):
         self.check("narrator_round_B3", prompts.narrator_round_messages(DS, DS.scenes["B3"], "含蓄", [], Step(1, "推进")))
 

@@ -3,7 +3,7 @@ import unittest
 from tests.support import DS
 
 from events import Event
-from markup import FormatError, parse_consent, parse_narration, parse_round, parse_turn
+from markup import FormatError, parse_consent, parse_narration, parse_pair_round, parse_round, parse_turn
 from prompts import perceive
 
 
@@ -71,15 +71,23 @@ class MarkupTest(unittest.TestCase):
         self.assertIn("写了别人的言行：碧瑶", str(ctx.exception))
 
     def test_round(self):
-        self.assertEqual(parse_round("叙事：无\n反应：陆雪琪、碧瑶", ["陆雪琪", "碧瑶"], False), (None, ["陆雪琪", "碧瑶"]))
-        self.assertEqual(parse_round("叙事：雨停了。\n反应：无", ["陆雪琪"], True), ("雨停了。", []))
-        self.assertEqual(parse_round("反应：陆雪琪。\n叙事：无", ["陆雪琪"], False), (None, ["陆雪琪"]))
-        for bad in ("叙事：无\n反应：张小凡", "叙事：雨。", "反应：陆雪琪", "叙事：无\n反应：陆雪琪、陆雪琪",
-                    "叙事：\n反应：无", "一、不需要。\n二、陆雪琪", "叙事：无\n陆雪琪（行）：她抬眼。\n反应：陆雪琪"):
+        self.assertEqual(parse_round("叙事：无\n轮到：陆雪琪、碧瑶", ["陆雪琪", "碧瑶"], False), (None, ["陆雪琪", "碧瑶"]))
+        self.assertEqual(parse_round("叙事：雨停了。\n轮到：无", ["陆雪琪", "碧瑶"], True), ("雨停了。", []))
+        self.assertEqual(parse_round("轮到：碧瑶。\n叙事：无", ["陆雪琪", "碧瑶"], False), (None, ["碧瑶"]))
+        for bad in ("叙事：无\n轮到：张小凡", "叙事：雨。", "轮到：陆雪琪", "叙事：无\n轮到：陆雪琪、陆雪琪",
+                    "叙事：\n轮到：无", "一、不需要。\n二、陆雪琪", "叙事：无\n陆雪琪（行）：她抬眼。\n轮到：陆雪琪",
+                    "叙事：无\n轮到：陆雪琪脚步一顿，没有回头", "叙事：无\n反应：陆雪琪"):
             with self.assertRaises(FormatError, msg=bad):
                 parse_round(bad, ["陆雪琪", "碧瑶"], False)
         with self.assertRaises(FormatError):
-            parse_round("叙事：无\n反应：无", ["陆雪琪"], True)
+            parse_round("叙事：无\n轮到：无", ["陆雪琪", "碧瑶"], True)
+
+    def test_pair_round(self):
+        self.assertEqual(parse_pair_round("叙事：无"), "")
+        self.assertEqual(parse_pair_round("叙事：雪停了。"), "雪停了。")
+        for bad in ("", "无", "叙事：", "叙事：无\n轮到：陆雪琪", "叙事：无\n叙事：雪停了。", "雪停了。"):
+            with self.assertRaises(FormatError, msg=bad):
+                parse_pair_round(bad)
 
     def test_narration_and_consent(self):
         self.assertEqual(parse_narration("夜深了。\n\n雪还在下。"), "夜深了。\n\n雪还在下。")
