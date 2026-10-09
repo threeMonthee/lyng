@@ -1,0 +1,33 @@
+validation/lab/tests/snapshots/narrator_round_A2.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 260-262,264
+validation/lab/tests/snapshots/narrator_closing_A2.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 259
+validation/lab/tests/snapshots/narrator_round_B3.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 206-208,211
+validation/lab/tests/snapshots/character_A2_lu.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 131
+validation/lab/prompts.py
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 43,83-84,92-94,96,98,107-108
+validation/lab/tests/snapshots/character_A3_lu.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 134
+validation/lab/tests/snapshots/narrator_opening_A1.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 208-209
+validation/lab/tests/snapshots/character_C1_adult.txt
+  s_bac33ba06c4f10::t_e2078bc9f15a9d 123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8e10a19dc6a2664681be8437634556c6dc7f090e",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}

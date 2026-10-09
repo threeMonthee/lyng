@@ -1,0 +1,22 @@
+plan/CURRENT_WORK.md
+  s_bac33ba06c4f10::t_367a4b7af238c7 8,15-17,21-22
+plan/core-validation.md
+  s_bac33ba06c4f10::t_a86517dda546df 3,76-188,191-218
+  s_bac33ba06c4f10::t_5e32e1df0647e9 189-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f29e0ff4379149ee07fa631edc82afa534b4a33c",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
