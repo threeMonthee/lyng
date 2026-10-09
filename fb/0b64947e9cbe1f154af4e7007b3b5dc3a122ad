@@ -1,0 +1,21 @@
+plan/core-validation.md
+  s_bac33ba06c4f10::t_d0bfbfa81a27c2 343-364
+plan/CURRENT_WORK.md
+  s_bac33ba06c4f10::t_8f42faa1c922db 5-15,17,19-22,26-28,30,32-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fb0b64947e9cbe1f154af4e7007b3b5dc3a122ad",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "unknown"
+      },
+      "human_author": null
+    }
+  }
+}
