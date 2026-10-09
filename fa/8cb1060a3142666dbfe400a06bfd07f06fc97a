@@ -1,0 +1,21 @@
+REPORT-v4.txt
+  s_8e20c42dedb23b::t_1e4643158610c9 1-100
+plan/CURRENT_WORK.md
+  s_8e20c42dedb23b::t_2d993a31e490ee 5,8-10,12,14-27,31-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fa8cb1060a3142666dbfe400a06bfd07f06fc97a",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "unknown"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
