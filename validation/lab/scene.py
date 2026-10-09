@@ -233,7 +233,8 @@ class SceneRun:
             parse = parse_pair_round
         else:
             def parse(t):
-                return parse_round(t, scene.ai_characters, require_something=step.kind == "推进")
+                return parse_round(t, scene.ai_characters, require_something=step.kind == "推进",
+                                   possessed=scene.possessed)
         decided = self._call(
             {"kind": "round", "scene": scene.id, "step": step.kind, "candidates": scene.ai_characters},
             prompts.narrator_round_messages(ds, scene, scale, before, step),

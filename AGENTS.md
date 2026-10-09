@@ -4,7 +4,7 @@
 
 仓库总览见 `README.md`，文档入口见 `docs/README.md`，当前阶段与待裁决事项见 `plan/CURRENT_WORK.md`。
 
-`docs/requires.md` 与 `docs/PROJECT_BIBLE.md` 已于 2026-09-30 定稿。当前阶段是**核心体验验证**：用最薄原型与真实模型盲测验证“人是真的、故事好看”，方案见 `plan/core-validation.md`。验证结论出来前不写产品代码、不定详细技术方案。新会话“继续”时，先读 `plan/CURRENT_WORK.md`，再读 `docs/reference/` 中与当前话题相关的部分。
+`docs/requires.md` 与 `docs/PROJECT_BIBLE.md` 已于 2026-09-30 定稿。核心体验验证已于 2026-10-09 结束（记录见 `plan/core-validation.md`），当前阶段是**实现第一个可用版本**：技术设计见 `docs/tech-design.md`，进度与待复核事项见 `plan/CURRENT_WORK.md`。`validation/` 是已结束的验证原型，只作移植来源，不再演进。新会话“继续”时，先读 `plan/CURRENT_WORK.md`，再读 `docs/tech-design.md` 与 `docs/reference/` 中与当前话题相关的部分。
 
 用户的请求与已确认方向有根本冲突时，先说明影响并给出更简单的建议，只暂停依赖该裁决的改动。提问时一次聚焦少数关键决定，并给出你的推荐。
 

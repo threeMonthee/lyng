@@ -85,3 +85,22 @@ class TechnicalFailureTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PossessedScheduledTest(unittest.TestCase):
+    """群戏里叙事者把附身的人物排进“轮到：”：算格式不合规，重试一次，不会让他“被轮到”。"""
+
+    def test_possessed_in_turn_list_is_rejected_then_recovered(self):
+        def hook(purpose, n):
+            if purpose["kind"] == "round" and not state["done"]:
+                state["done"] = True
+                return ok("叙事：无\n轮到：张小凡、碧瑶")
+            return None
+
+        state = {"done": False}
+        model = RecordingFake(hook)
+        result = SceneRun(DS, DS.scenes["A2"], "含蓄", model, Ledger(1.0), 1000).run()
+        first_round = next(c for c in result.calls if c.kind == "round")
+        self.assertEqual(first_round.outcome, "recovered")
+        self.assertIn("被附身的人物", first_round.attempts[0]["error"])
+        self.assertFalse([e for e in result.events if e.kind == "character" and e.speaker == "张小凡"])

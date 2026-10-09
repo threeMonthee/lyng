@@ -74,6 +74,18 @@ class PromptSnapshotTest(unittest.TestCase):
         self.check("consent_C1", prompts.consent_messages(DS.scenes["C1"], events))
 
 
+class PossessedNotSchedulableTest(unittest.TestCase):
+    """群戏的“轮到：”里没有附身的人物：Prompt 说明，代码拒绝（markup.parse_round）。"""
+
+    def test_group_prompt_says_possessed_is_not_selectable(self):
+        text = dump(prompts.narrator_round_messages(DS, DS.scenes["A2"], "含蓄", [], Step(1, "静候")))
+        self.assertIn("张小凡是被附身的人物，不在可选之列，不要写进“轮到：”；他什么时候开口，由他自己决定。", text)
+
+    def test_observer_group_prompt_has_no_possessed_note(self):
+        text = dump(prompts.narrator_round_messages(DS, DS.scenes["B3"], "含蓄", [], Step(1, "推进")))
+        self.assertNotIn("被附身的人物", text)
+
+
 class LengthRuleTest(unittest.TestCase):
     """圣经 §4.7“篇幅跟着场景走”写进了人物与叙事者的每一种 Prompt。"""
 

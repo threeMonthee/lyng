@@ -82,6 +82,12 @@ class MarkupTest(unittest.TestCase):
         with self.assertRaises(FormatError):
             parse_round("叙事：无\n轮到：无", ["陆雪琪", "碧瑶"], True)
 
+    def test_round_rejects_possessed_character(self):
+        with self.assertRaises(FormatError) as ctx:
+            parse_round("叙事：无\n轮到：张小凡、碧瑶", ["陆雪琪", "碧瑶"], False, possessed="张小凡")
+        self.assertIn("张小凡是被附身的人物", str(ctx.exception))
+        self.assertEqual(parse_round("叙事：无\n轮到：碧瑶", ["陆雪琪", "碧瑶"], False, possessed="张小凡"), (None, ["碧瑶"]))
+
     def test_pair_round(self):
         self.assertEqual(parse_pair_round("叙事：无"), "")
         self.assertEqual(parse_pair_round("叙事：雪停了。"), "雪停了。")

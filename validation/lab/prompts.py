@@ -108,7 +108,9 @@ ROUND_GROUP = """只写下面两行，不写理由，不写别的文字：
 轮到：……
 
 """ + NARRATION_RULE + """
-“轮到：”写在场的人物里轮到谁对刚刚发生的事作出反应，按先后写名字，用“、”隔开；没有人就写“轮到：无”。已经离开这里、看不到也听不到的人物，不会轮到。你只写名字，他们自己决定说什么、做什么，也可以什么都不做。可选的人物：{candidates}。{advance}"""
+“轮到：”写在场的人物里轮到谁对刚刚发生的事作出反应，按先后写名字，用“、”隔开；没有人就写“轮到：无”。已经离开这里、看不到也听不到的人物，不会轮到。你只写名字，他们自己决定说什么、做什么，也可以什么都不做。可选的人物：{candidates}。{possessed}{advance}"""
+
+POSSESSED_RULE = "{name}是被附身的人物，不在可选之列，不要写进“轮到：”；他什么时候开口，由他自己决定。"
 
 ADVANCE_RULE = "\n这一轮要让这一场往前走一段：“叙事：”和“轮到：”不能都是“无”。"
 
@@ -221,6 +223,7 @@ def narrator_round_messages(ds: Dataset, scene: Scene, scale: str, events: list[
     else:
         instructions = ROUND_GROUP.format(
             candidates="、".join(scene.ai_characters),
+            possessed=POSSESSED_RULE.format(name=scene.possessed) if scene.possessed else "",
             advance=ADVANCE_RULE if step.kind == "推进" else "",
         )
     user = NARRATOR_ROUND_USER.format(perception=perceive(events), latest=latest_text(scene, step),

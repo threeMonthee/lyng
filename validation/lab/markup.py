@@ -80,8 +80,9 @@ def parse_pair_round(text: str) -> str:
     return "" if lines[0][2] == "无" else lines[0][2]
 
 
-def parse_round(text: str, candidates: list[str], require_something: bool) -> tuple[str | None, list[str]]:
-    """群戏的每一轮：恰好一行“叙事：”、一行“轮到：”，没有就写“无”。"""
+def parse_round(text: str, candidates: list[str], require_something: bool,
+                possessed: str | None = None) -> tuple[str | None, list[str]]:
+    """群戏的每一轮：恰好一行“叙事：”、一行“轮到：”，没有就写“无”。附身的人物不在可选之列，写了就拒绝。"""
     lines = _lines(text)
     if any(n is not None for n, _, _ in lines):
         raise FormatError("叙事者只写“叙事：”“轮到：”两行，不写人物的言行")
@@ -93,6 +94,8 @@ def parse_round(text: str, candidates: list[str], require_something: bool) -> tu
     narration = None if body["叙事"] == "无" else body["叙事"]
     raw = body["轮到"].rstrip("。")
     names = [] if raw == "无" else [n for n in re.split(r"[、，,\s]+", raw) if n]
+    if possessed and possessed in names:
+        raise FormatError(f"{possessed}是被附身的人物，不在“轮到：”的可选之列")
     if any(n not in candidates for n in names) or len(set(names)) != len(names):
         raise FormatError(f"“轮到：”只能是 {'、'.join(candidates)} 或“无”，且不重复")
     if require_something and not narration and not names:
