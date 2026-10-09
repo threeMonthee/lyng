@@ -1,0 +1,42 @@
+plan/core-validation.md
+  s_8e20c42dedb23b::t_05372c16765fba 380
+  s_8e20c42dedb23b::t_dc57b6f7f0b266 365-379
+validation/lab/prompts.py
+  s_8e20c42dedb23b::t_d8f99d3e1ed824 111-113,226
+validation/lab/tests/snapshots/narrator_round_A2.txt
+  s_8e20c42dedb23b::t_70da5516510dd7 265
+AGENTS.md
+  s_8e20c42dedb23b::t_05372c16765fba 7
+validation/lab/tests/test_dataset_and_markup.py
+  s_8e20c42dedb23b::t_70da5516510dd7 85-90
+validation/lab/tests/test_failures.py
+  s_8e20c42dedb23b::t_70da5516510dd7 88-106
+validation/lab/scene.py
+  s_8e20c42dedb23b::t_d8f99d3e1ed824 236-237
+validation/lab/tests/test_prompts.py
+  s_8e20c42dedb23b::t_70da5516510dd7 77-88
+docs/requires.md
+  s_8e20c42dedb23b::t_dc57b6f7f0b266 25,33
+validation/lab/markup.py
+  s_8e20c42dedb23b::t_d8f99d3e1ed824 83-85,97-98
+plan/CURRENT_WORK.md
+  s_8e20c42dedb23b::t_c7396e2730ea34 5,7-14,16,18-20,24-26,31
+validation/lab/README.txt
+  s_8e20c42dedb23b::t_3dfba68e5ca022 71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "90372b2de11e5ed9f91f170b2bf0116171f138ee",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
