@@ -1,0 +1,85 @@
+client/src/timeline.test.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-64
+client/package.json
+  s_8e20c42dedb23b::t_fff93dce6d40a3 1-25
+client/vite.config.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1,3-9
+  s_8e20c42dedb23b::t_4e92c33aa59035 2
+client/src/useLongPress.ts
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-34
+client/public/manifest.webmanifest
+  s_8e20c42dedb23b::t_4e92c33aa59035 1-15
+client/src/pages/HomePage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-88
+client/src/api.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-23
+client/src/styles.css
+  s_8e20c42dedb23b::t_7c002e42c3be61 1-129
+scripts/start.sh
+  s_8e20c42dedb23b::t_a800a39e7b24bb 1-31
+client/src/pages/CreatePage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-146
+client/src/route.ts
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-42
+server/src/main/java/app/lyng/web/WebConfig.java
+  s_8e20c42dedb23b::t_7db42f63372ac7 1-21
+client/make-icons.mjs
+  s_8e20c42dedb23b::t_4e92c33aa59035 1-48
+client/tsconfig.json
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-17
+client/src/pages/SettingsPage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-100
+server/src/test/java/app/lyng/web/ApiFlowTest.java
+  s_8e20c42dedb23b::t_35cbee790c03a4 201-206
+client/src/sse.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-71
+client/src/timeline.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-70
+client/src/pages/CharacterPage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-51
+client/src/pages/ScenePage.tsx
+  s_8e20c42dedb23b::t_7c002e42c3be61 1-261
+client/src/pages/NewScenePage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-122
+client/src/ui.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-56
+server/src/main/java/app/lyng/world/CreationService.java
+  s_8e20c42dedb23b::t_35cbee790c03a4 48-50
+client/src/pages/LoginPage.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-44
+server/src/main/java/app/lyng/world/WorldRepository.java
+  s_8e20c42dedb23b::t_35cbee790c03a4 39-43
+client/src/types.ts
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-92
+client/src/App.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-41
+client/index.html
+  s_8e20c42dedb23b::t_015f00af04c5ca 1-19
+client/public/icon.svg
+  s_8e20c42dedb23b::t_4e92c33aa59035 1
+client/public/sw.js
+  s_8e20c42dedb23b::t_4e92c33aa59035 1-30
+client/src/main.tsx
+  s_8e20c42dedb23b::t_b30a5bf78bb0b2 1-16
+server/src/main/java/app/lyng/web/ApiExceptionHandler.java
+  s_8e20c42dedb23b::t_7db42f63372ac7 11,23-25
+  s_8e20c42dedb23b::t_836960e80813dd 26-27
+client/package-lock.json
+  s_8e20c42dedb23b::t_29927dba2662e1 1-1581
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "83c4255432e82d5dbc675c4017782e0db0d6d735",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
