@@ -1,0 +1,179 @@
+server/src/main/java/app/lyng/event/Visibility.java
+  s_8e20c42dedb23b::t_126148a163725e 1-28
+server/src/main/java/app/lyng/web/SceneController.java
+  s_8e20c42dedb23b::t_49f45654b13598 1-44,47-77,79,81-126
+  s_8e20c42dedb23b::t_2845c65c3331dc 45-46,78,80
+server/src/main/java/app/lyng/model/FormatError.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-9
+server/src/main/java/app/lyng/model/Completion.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-9
+server/src/main/java/app/lyng/markup/LabeledLine.java
+  s_8e20c42dedb23b::t_a765bbdd8688d0 1-2,6-28,30,32,35-42,44-48,50-55
+  s_8e20c42dedb23b::t_5043ce77defd91 3-5,29,31,33-34,43,49
+server/src/main/java/app/lyng/prompt/PromptText.java
+  s_8e20c42dedb23b::t_d2e4546ffa7bea 1-24,26-43,45-74,76-81,83-90,92-93,95-99,101-107,109-110,112-114,116-122,124-134
+  s_8e20c42dedb23b::t_126148a163725e 25,44,75,82,91,94,100,108,111,115,123
+server/src/main/java/app/lyng/world/WorldRepository.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-58
+server/src/main/java/app/lyng/model/ModelCallRepository.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-40,43-51
+  s_8e20c42dedb23b::t_f859ade475c1ab 41-42
+server/src/main/java/app/lyng/model/ModelCall.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-26
+server/src/main/java/app/lyng/prompt/NarratorContext.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-15
+server/src/main/java/app/lyng/scene/RoundListener.java
+  s_8e20c42dedb23b::t_6016b1c56256d3 1-28
+server/src/main/resources/application.yml
+  s_8e20c42dedb23b::t_ccd855f7e9b89e 1-46
+docker-compose.yml
+  s_8e20c42dedb23b::t_2bfea9fe9440f2 1-18
+server/src/main/java/app/lyng/model/ChatModel.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-9
+server/src/main/java/app/lyng/prompt/Prompts.java
+  s_8e20c42dedb23b::t_b2d54cf46c661b 1-16,38-229
+  s_8e20c42dedb23b::t_8b63d78799bede 17-37
+server/src/main/java/app/lyng/markup/Draft.java
+  s_8e20c42dedb23b::t_08f6e163728fd0 1-14
+server/src/main/java/app/lyng/model/ModelRole.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-13
+server/src/main/java/app/lyng/model/ModelProperties.java
+  s_8e20c42dedb23b::t_c0c76e55989306 1-32
+server/src/main/java/app/lyng/LyngApplication.java
+  s_8e20c42dedb23b::t_2577fabcc9007a 1-4,6-7,9-13
+  s_8e20c42dedb23b::t_6016b1c56256d3 5,8
+server/src/main/java/app/lyng/model/ChatMessage.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-12
+server/src/main/java/app/lyng/event/SceneEvent.java
+  s_8e20c42dedb23b::t_126148a163725e 1-60
+server/src/main/java/app/lyng/world/CreationService.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-83
+server/src/main/java/app/lyng/model/ModelSettings.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-51
+server/src/main/java/app/lyng/scene/SceneCast.java
+  s_8e20c42dedb23b::t_6016b1c56256d3 1-5,7-11,13-14
+  s_8e20c42dedb23b::t_5e0a333e3cc7a9 6,12
+server/src/main/java/app/lyng/model/OpenRouterChatModel.java
+  s_8e20c42dedb23b::t_c0c76e55989306 1-217
+server/src/main/java/app/lyng/scene/SceneRepository.java
+  s_8e20c42dedb23b::t_ebf7891f07a8c1 1-81,83-91,93-108
+  s_8e20c42dedb23b::t_fe92ac6860a074 82,92
+server/src/main/java/app/lyng/auth/AuthController.java
+  s_8e20c42dedb23b::t_42dbdad43cadd3 1-63
+server/src/main/java/app/lyng/scene/Scene.java
+  s_8e20c42dedb23b::t_ebf7891f07a8c1 1-24
+server/src/main/java/app/lyng/markup/TurnStreamParser.java
+  s_8e20c42dedb23b::t_9340f85173d39c 1-120
+server/src/main/java/app/lyng/markup/Turn.java
+  s_8e20c42dedb23b::t_a765bbdd8688d0 1-6
+server/src/main/java/app/lyng/scene/RecallService.java
+  s_8e20c42dedb23b::t_e03e1eaff4bfba 63-80
+  s_8e20c42dedb23b::t_a4e47c26415560 1-62,81-132
+server/src/main/java/app/lyng/web/BadRequestException.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-8
+server/src/main/java/app/lyng/auth/AuthProperties.java
+  s_8e20c42dedb23b::t_42dbdad43cadd3 1-7
+server/src/main/java/app/lyng/model/ModelConfig.java
+  s_8e20c42dedb23b::t_ccd3187e4c6edd 1-21
+server/pom.xml
+  s_8e20c42dedb23b::t_2577fabcc9007a 1-73
+server/src/main/java/app/lyng/prompt/Relation.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-4
+server/src/main/java/app/lyng/markup/Beat.java
+  s_8e20c42dedb23b::t_a765bbdd8688d0 1-8
+server/src/main/java/app/lyng/scene/SceneService.java
+  s_8e20c42dedb23b::t_a0302fdf27ca2f 1-151
+server/src/main/java/app/lyng/scene/RecollectionRepository.java
+  s_8e20c42dedb23b::t_ebf7891f07a8c1 1-49
+server/src/main/java/app/lyng/web/SettingsController.java
+  s_8e20c42dedb23b::t_49f45654b13598 1-70
+server/src/main/java/app/lyng/model/Usage.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-6
+server/src/main/java/app/lyng/web/WorldController.java
+  s_8e20c42dedb23b::t_49f45654b13598 1-48
+server/src/main/java/app/lyng/web/NotFoundException.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-9
+server/src/main/java/app/lyng/prompt/PastScene.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-4
+server/src/main/java/app/lyng/scene/SceneStatus.java
+  s_8e20c42dedb23b::t_6016b1c56256d3 1-37
+server/src/main/java/app/lyng/model/FakeChatModel.java
+  s_8e20c42dedb23b::t_df7561d8902663 1-98
+server/src/main/java/app/lyng/event/EventKind.java
+  s_8e20c42dedb23b::t_126148a163725e 1-18
+server/src/main/java/app/lyng/world/World.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-6
+server/src/main/java/app/lyng/model/ChatRequest.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-5
+server/src/main/java/app/lyng/world/Character.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-6
+server/src/main/java/app/lyng/prompt/Template.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-27
+server/src/main/java/app/lyng/scene/SceneRun.java
+  s_8e20c42dedb23b::t_5e0a333e3cc7a9 1-66,68-70,74-89,91-96,100-201,208-252,259-310
+  s_8e20c42dedb23b::t_a0302fdf27ca2f 67,71-73,90,97-99,202-207,253-258
+server/src/main/java/app/lyng/scene/MemoryProperties.java
+  s_8e20c42dedb23b::t_a4e47c26415560 1-12
+server/src/main/java/app/lyng/auth/AuthFilter.java
+  s_8e20c42dedb23b::t_42dbdad43cadd3 1-62
+server/src/main/java/app/lyng/web/SseListener.java
+  s_8e20c42dedb23b::t_e03e1eaff4bfba 1-66
+server/src/main/java/app/lyng/model/CallPurpose.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-2,4-9,11,13
+  s_8e20c42dedb23b::t_df7561d8902663 3,10,12,14-19
+server/src/main/java/app/lyng/auth/AuthService.java
+  s_8e20c42dedb23b::t_42dbdad43cadd3 1-96
+server/src/main/java/app/lyng/web/ApiExceptionHandler.java
+  s_8e20c42dedb23b::t_e03e1eaff4bfba 1-47
+server/src/main/java/app/lyng/markup/Markup.java
+  s_8e20c42dedb23b::t_0e4ac9960dda2c 164-244
+  s_8e20c42dedb23b::t_08f6e163728fd0 125,129-130,134-138,140-147,150,153-155,158-159,162
+  s_8e20c42dedb23b::t_5043ce77defd91 1-124,126-128,131-133,139,148-149,151-152,156-157,160-161,163,245
+server/src/main/java/app/lyng/prompt/CharacterContext.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-12
+server/src/main/java/app/lyng/model/ModelGateway.java
+  s_8e20c42dedb23b::t_ccd3187e4c6edd 1-128
+server/src/main/java/app/lyng/prompt/Perception.java
+  s_8e20c42dedb23b::t_7eac06895bb6c4 1-54
+.env.example
+  s_8e20c42dedb23b::t_2bfea9fe9440f2 1-17
+server/src/main/java/app/lyng/web/CreationController.java
+  s_8e20c42dedb23b::t_49f45654b13598 1-43
+server/src/main/java/app/lyng/model/Attempt.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-36
+server/src/main/java/app/lyng/prompt/Memory.java
+  s_8e20c42dedb23b::t_c4e411f112f486 1-4
+server/src/main/java/app/lyng/web/ConflictException.java
+  s_8e20c42dedb23b::t_fc76b0d02dadc1 1-9
+server/src/main/resources/db/migration/V1__init.sql
+  s_8e20c42dedb23b::t_fe92ac6860a074 86
+  s_8e20c42dedb23b::t_ccd855f7e9b89e 1-85,87-134
+server/src/main/java/app/lyng/model/CallFailure.java
+  s_8e20c42dedb23b::t_ace460643148e1 1-25
+server/src/main/java/app/lyng/scene/ContextAssembler.java
+  s_8e20c42dedb23b::t_a4e47c26415560 1-86
+server/src/main/java/app/lyng/web/EventView.java
+  s_8e20c42dedb23b::t_e03e1eaff4bfba 1-16
+server/src/main/java/app/lyng/model/ModelException.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-31
+server/src/main/java/app/lyng/model/ModelChoice.java
+  s_8e20c42dedb23b::t_3149b61397dba5 1-33
+server/src/main/java/app/lyng/scene/Recollection.java
+  s_8e20c42dedb23b::t_ebf7891f07a8c1 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02a2874cfb10397a9a512b48d215d8963381731f",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
