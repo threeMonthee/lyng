@@ -56,6 +56,30 @@ class EndToEndTest(unittest.TestCase):
         self.assertIn("vendor/beta", key)
         self.assertIn("甲", html)
 
+    def test_same_model_with_different_reasoning_settings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            argv = ["--fake", "--model", "vendor/alpha", "--model", "vendor/alpha@off",
+                    "--adult-model", "vendor/alpha", "--adult-model", "vendor/alpha@off",
+                    "--scenes", "A1,C1", "--repeats", "1", "--out", tmp]
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(run.main(argv), 0)
+            (out,) = Path(tmp).iterdir()
+            record = json.loads((out / "record.json").read_text(encoding="utf-8"))
+            html = (out / "blind.html").read_text(encoding="utf-8")
+            key = (out / "key.txt").read_text(encoding="utf-8")
+        self.assertIn("vendor/alpha@off", key)
+        self.assertNotIn("@off", html)
+        self.assertEqual(sorted(record["stats_by_code"]), sorted(record["codes"]))
+        for s in record["stats_by_code"].values():
+            self.assertIn("median_latency_s", s)
+            self.assertIn("median_reasoning_tokens", s)
+        self.assertEqual(len(record["units"]), 2 * 3)
+
+    def test_bad_reasoning_setting_is_rejected(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit):
+                run.parse_args(["--fake", "--model", "vendor/alpha@turbo"])
+
     def test_real_run_requires_budget(self):
         with contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit):

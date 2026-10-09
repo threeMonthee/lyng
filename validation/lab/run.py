@@ -14,7 +14,7 @@ from pathlib import Path
 import dataset
 import render
 from events import Event
-from models import FakeModel, OpenRouterClient
+from models import FakeModel, OpenRouterClient, parse_participant
 from scene import Ledger, SceneResult, SceneRun
 
 LAB_DIR = Path(__file__).resolve().parent
@@ -44,7 +44,8 @@ class Unit:
 
 def parse_args(argv):
     p = argparse.ArgumentParser(description="lyng 核心体验盲测原型")
-    p.add_argument("--model", action="append", default=[], help="OpenRouter 模型 ID，可重复；用 --fake 时只作标签")
+    p.add_argument("--model", action="append", default=[],
+                   help="参赛者：OpenRouter 模型 ID，可加“@推理设置”（off / minimal / low / medium / high）；可重复；用 --fake 时只作标签")
     p.add_argument("--adult-model", action="append", default=[], help="支持成人向的模型 ID（须同时出现在 --model 中）")
     p.add_argument("--scenes", default="all", help="逗号分隔的场景编号，默认全部")
     p.add_argument("--repeats", type=int, default=2, help="每个模型每个场景跑几次，默认 2")
@@ -66,6 +67,11 @@ def parse_args(argv):
         return args
     if not args.model:
         p.error("至少指定一个 --model")
+    for spec in args.model:
+        try:
+            parse_participant(spec)
+        except ValueError as e:
+            p.error(str(e))
     if len(set(args.model)) != len(args.model):
         p.error("--model 有重复")
     if len(args.model) > len(CODES):
@@ -221,7 +227,10 @@ def main(argv=None) -> int:
     if args.fake:
         clients = {code: FakeModel(mid) for code, mid in models.items()}
     else:
-        clients = {code: OpenRouterClient(mid) for code, mid in models.items()}
+        clients = {}
+        for code, spec in models.items():
+            model_id, reasoning = parse_participant(spec)
+            clients[code] = OpenRouterClient(model_id, reasoning=reasoning)
 
     ledger = Ledger(args.budget)
     if orig:
@@ -249,6 +258,8 @@ def main(argv=None) -> int:
         "resumed_from": orig["run_id"] if orig else None,
         "ledger": {"budget": args.budget, "spent": round(ledger.spent, 8), "stop_reason": stop_reason},
         "stats": stats(new_units),
+        # 各参赛者（按代号）的耗时与推理 token 中位数；盲评页不展示
+        "stats_by_code": {code: stats([u for u in new_units if u.code == code]) for code in models},
         "units": [u.to_dict() for u in new_units],
     }
     (out / "record.json").write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding="utf-8")

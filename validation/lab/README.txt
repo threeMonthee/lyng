@@ -32,7 +32,8 @@ tests/       测试；tests/snapshots/ 是 Prompt 快照
     python3 run.py --model <模型ID> --model <模型ID> --adult-model <模型ID> --scenes A1 --repeats 1 --budget 1
 
 常用参数：
-  --model        OpenRouter 模型 ID，可重复。不预设任何模型，必须显式传入。
+  --model        参赛者：OpenRouter 模型 ID，可加“@推理设置”（off 关闭，或 minimal / low / medium / high），可重复。
+                 同一模型的不同推理设置是不同的参赛者；不写就用模型默认。不预设任何模型，必须显式传入。
   --adult-model  支持成人向的模型；C1 成人向一档只对它们跑。
   --scenes       逗号分隔的场景编号，默认全部。A3 依赖 A2，须一起选。
   --repeats      每个模型每个场景跑几次，默认 2。
@@ -50,7 +51,7 @@ tests/       测试；tests/snapshots/ 是 Prompt 快照
 
 每次运行在 runs/<时间>/ 下写四个文件：
 
-  record.json  完整记录：每场的事件、每次调用的每次尝试（原文、结束原因、费用、耗时、推理 token、错误）、统计与账目。只出现代号；含按代号的费用，盲评结束前不要看。
+  record.json  完整记录（每次尝试另记 OpenRouter 实际路由到的服务商；stats_by_code 是各代号的耗时与推理 token 中位数）：每场的事件、每次调用的每次尝试（原文、结束原因、费用、耗时、推理 token、错误）、统计与账目。只出现代号；含按代号的费用，盲评结束前不要看。
   by-model.json  按模型 ID 汇总的统计（调用、失败、拒绝、花费、耗时与推理 token 中位数），不含代号。
   blind.html   匿名盲评页：同一场景不同模型并排，气泡说话、动作成行、叙事者居中，点气泡或动作看心声。
   key.txt      代号与模型 ID 的对应。盲评结束前不要打开。

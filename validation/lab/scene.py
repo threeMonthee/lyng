@@ -134,7 +134,7 @@ class SceneRun:
                 rec.outcome = "stopped"
                 raise RunStop(f"请求失败：{e}") from e
             att = {"text": comp.text, "finish_reason": comp.finish_reason, "cost": comp.cost, "usage": comp.usage,
-                   "latency_s": round(time.monotonic() - started, 3)}
+                   "provider": comp.provider, "latency_s": round(time.monotonic() - started, 3)}
             rec.attempts.append(att)
             if comp.cost is None:
                 att["error"] = "接口未返回费用"

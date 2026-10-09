@@ -55,26 +55,50 @@ class Completion:
     finish_reason: str | None
     cost: float | None  # 美元；None 表示接口没有返回费用
     usage: dict = field(default_factory=dict)
+    provider: str | None = None  # OpenRouter 实际路由到的服务商；同一模型 ID 背后的量化与实现可能不同
+
+
+REASONING = ("off", "minimal", "low", "medium", "high")
+
+
+def parse_participant(spec: str) -> tuple[str, str | None]:
+    """参赛者写作“模型ID”或“模型ID@推理设置”。推理设置为 off（关闭）或 minimal / low / medium / high。
+
+    同一模型的不同推理设置是不同的参赛者；不写推理设置就用模型默认。
+    """
+    model_id, sep, reasoning = spec.partition("@")
+    if not model_id or (sep and reasoning not in REASONING):
+        raise ValueError(f"参赛者写法不对：{spec}（推理设置只能是 {'、'.join(REASONING)}）")
+    return model_id, reasoning or None
 
 
 class OpenRouterClient:
-    def __init__(self, model_id: str, api_key: str | None = None, timeout: float = 180.0):
+    def __init__(self, model_id: str, api_key: str | None = None, timeout: float = 180.0,
+                 reasoning: str | None = None):
         if not model_id:
             raise ValueError("模型 ID 必须从命令行显式传入")
+        if reasoning is not None and reasoning not in REASONING:
+            raise ValueError(f"未知推理设置：{reasoning}")
         key = api_key if api_key is not None else os.environ.get("OPENROUTER_API_KEY")
         if not key:
             raise RuntimeError("环境变量 OPENROUTER_API_KEY 未设置")
         self.model_id = model_id
+        self.reasoning = reasoning
         self._key = key
         self._timeout = timeout
 
     def request_body(self, messages: list[dict], max_tokens: int) -> dict:
-        return {
+        body = {
             "model": self.model_id,
             "messages": messages,
             "max_tokens": max_tokens,
             "usage": {"include": True},
         }
+        if self.reasoning == "off":
+            body["reasoning"] = {"enabled": False}
+        elif self.reasoning:
+            body["reasoning"] = {"effort": self.reasoning}
+        return body
 
     def complete(self, messages: list[dict], max_tokens: int, purpose: dict) -> Completion:
         req = urllib.request.Request(
@@ -121,6 +145,7 @@ def parse_response(payload: dict) -> Completion:
             **{k: usage[k] for k in ("prompt_tokens", "completion_tokens", "total_tokens") if k in usage},
             "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
         },
+        provider=payload.get("provider"),
     )
 
 

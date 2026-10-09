@@ -9,7 +9,8 @@ from unittest import mock
 
 from tests.support import DS  # noqa: F401  (确保 sys.path)
 
-from models import FATAL, REFUSED, TRANSIENT, OpenRouterClient, RequestError, classify, parse_response
+from models import (FATAL, REFUSED, TRANSIENT, OpenRouterClient, RequestError, classify, parse_participant,
+                    parse_response)
 
 
 def payload(content="【叙事】夜。", finish="stop", cost=0.00123):
@@ -43,6 +44,30 @@ class OpenRouterTest(unittest.TestCase):
         self.assertEqual(body["model"], "vendor/model")
         self.assertEqual(body["max_tokens"], 500)
         self.assertEqual(body["usage"], {"include": True})
+
+    def test_reasoning_setting_in_request_body(self):
+        msgs = [{"role": "user", "content": "x"}]
+        self.assertNotIn("reasoning", OpenRouterClient("vendor/model", api_key="k").request_body(msgs, 10))
+        off = OpenRouterClient("vendor/model", api_key="k", reasoning="off").request_body(msgs, 10)
+        self.assertEqual(off["reasoning"], {"enabled": False})
+        low = OpenRouterClient("vendor/model", api_key="k", reasoning="low").request_body(msgs, 10)
+        self.assertEqual(low["reasoning"], {"effort": "low"})
+        with self.assertRaises(ValueError):
+            OpenRouterClient("vendor/model", api_key="k", reasoning="turbo")
+
+    def test_parse_participant(self):
+        self.assertEqual(parse_participant("vendor/model"), ("vendor/model", None))
+        self.assertEqual(parse_participant("vendor/model@off"), ("vendor/model", "off"))
+        self.assertEqual(parse_participant("vendor/model@minimal"), ("vendor/model", "minimal"))
+        for bad in ("vendor/model@turbo", "@off", "vendor/model@"):
+            with self.assertRaises(ValueError, msg=bad):
+                parse_participant(bad)
+
+    def test_provider_is_recorded(self):
+        p = payload()
+        p["provider"] = "SomeHost"
+        self.assertEqual(parse_response(p).provider, "SomeHost")
+        self.assertIsNone(parse_response(payload()).provider)
 
     def test_parse_cost(self):
         comp = parse_response(payload())
