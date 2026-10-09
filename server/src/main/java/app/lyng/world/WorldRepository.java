@@ -36,6 +36,11 @@ public class WorldRepository {
         return jdbc.sql(WORLD + " WHERE user_id = ? ORDER BY created_at").param(userId).query(World.class).list();
     }
 
+    public boolean worldNameTaken(UUID userId, String name) {
+        return jdbc.sql("SELECT count(*) FROM worlds WHERE user_id = ? AND name = ?").params(userId, name)
+                .query(Integer.class).single() > 0;
+    }
+
     public World world(UUID userId, UUID id) {
         return jdbc.sql(WORLD + " WHERE user_id = ? AND id = ?").params(userId, id).query(World.class).optional()
                 .orElseThrow(() -> new NotFoundException("世界"));

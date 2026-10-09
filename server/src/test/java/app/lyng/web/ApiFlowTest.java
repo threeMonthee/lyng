@@ -198,6 +198,12 @@ class ApiFlowTest extends IntegrationTest {
     @Test
     void validatesInput() {
         ApiClient api = login();
+        Map<String, Object> draft = Map.of("draft", Map.of("world", Map.of("name", "同名世界", "publicText", "p", "narratorText", "n"),
+                "characters", List.of(Map.of("name", "阿青", "profile", "x"))));
+        assertThat(api.post("/creation/confirm", draft).status()).isEqualTo(200);
+        ApiClient.Response again = api.post("/creation/confirm", draft);
+        assertThat(again.status()).isEqualTo(400);
+        assertThat(again.json().path("error").asString()).contains("已经有叫“同名世界”的世界了");
         assertThat(api.post("/creation/confirm", Map.of("draft", Map.of("characters", List.of()))).status()).isEqualTo(400);
         assertThat(api.post("/creation/confirm", Map.of("draft", Map.of(
                 "world", Map.of("name", "w", "publicText", "p", "narratorText", "n"),

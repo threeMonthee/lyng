@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 class ApiExceptionHandler {
@@ -17,6 +18,11 @@ class ApiExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<Map<String, String>> notFound(NotFoundException e) {
         return body(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<Map<String, String>> noResource(NoResourceFoundException e) {
+        return body(HttpStatus.NOT_FOUND, "没有这个地址");
     }
 
     @ExceptionHandler(ConflictException.class)

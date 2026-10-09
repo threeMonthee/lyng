@@ -45,6 +45,9 @@ public class CreationService {
     @Transactional
     public List<Character> confirm(UUID userId, Draft draft, UUID worldId) {
         validate(draft, worldId == null);
+        if (worldId == null && worlds.worldNameTaken(userId, draft.world().name().strip())) {
+            throw new BadRequestException("已经有叫“" + draft.world().name().strip() + "”的世界了，换一个名字，或者在那个世界里创作人物");
+        }
         World world = worldId == null
                 ? worlds.insertWorld(userId, draft.world().name().strip(), draft.world().publicText().strip(),
                         draft.world().narratorText().strip())
