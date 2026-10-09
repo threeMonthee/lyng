@@ -59,6 +59,13 @@
       <version>2.2.2</version>
       <scope>test</scope>
     </dependency>
+    <!-- Apple Silicon 上嵌入式 PostgreSQL 的二进制；其他平台由 embedded-postgres 传递依赖带入 -->
+    <dependency>
+      <groupId>io.zonky.test.postgres</groupId>
+      <artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
+      <version>18.4.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
