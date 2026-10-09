@@ -1,0 +1,31 @@
+server/src/main/resources/application.yml
+  s_8e20c42dedb23b::t_d892591a2d98be 35
+server/src/test/resources/snapshots/draft_existing_world.txt
+  s_8e20c42dedb23b::t_d892591a2d98be 6
+server/src/main/java/app/lyng/prompt/Prompts.java
+  s_8e20c42dedb23b::t_d892591a2d98be 196
+client/src/pages/CreatePage.tsx
+  s_8e20c42dedb23b::t_d892591a2d98be 135
+server/src/test/resources/snapshots/draft_new_world.txt
+  s_8e20c42dedb23b::t_d892591a2d98be 6
+.env.example
+  s_8e20c42dedb23b::t_d892591a2d98be 14
+docs/tech-design.md
+  s_8e20c42dedb23b::t_102c7f592a29b7 127,130,286
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "91ec812476c720ce109dfa024592dcddbc1a9a0c",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
