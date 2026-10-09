@@ -88,7 +88,7 @@ class SceneVisibilityTest(unittest.TestCase):
 
         def hook(purpose, n):
             if purpose["kind"] == "opening":
-                return ok("【叙事】山海苑后院，灯笼在风里晃。石桌上落了一层薄霜。")
+                return ok("山海苑后院，灯笼在风里晃。石桌上落了一层薄霜。")
             return None
 
         model = RecordingFake(hook)

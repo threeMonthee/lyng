@@ -7,7 +7,7 @@ from tests.support import DS, RecordingFake, ok
 from models import Completion
 from scene import Ledger, SceneRun
 
-GOOD_TURN = "【行】陆雪琪看了他一眼。\n【说】嗯。\n【心声】他来了。"
+GOOD_TURN = "陆雪琪（行）：陆雪琪看了他一眼。\n陆雪琪（说）：嗯。\n陆雪琪（心声）：他来了。"
 
 
 def first_character_call(bad_responses):
@@ -44,7 +44,7 @@ class TechnicalFailureTest(unittest.TestCase):
         self.assertFalse([e for e in result.events if e.kind == "character" and e.round == first_round])
         # 之后的调用里，没有人看到她“没有开口”
         later = model.prompts_for("character", "陆雪琪")[2]
-        self.assertNotIn("陆雪琪（你自己）没有开口", later)
+        self.assertNotIn("陆雪琪没有开口", later)
         self.assertEqual(result.status, "completed")
 
     def test_empty_response(self):
@@ -57,7 +57,7 @@ class TechnicalFailureTest(unittest.TestCase):
         self.assert_final_failure(ok("陆雪琪看了他一眼，没有说话。"), "格式不合规")
 
     def test_missing_inner_voice_is_malformed(self):
-        self.assert_final_failure(ok("【说】嗯。"), "格式不合规")
+        self.assert_final_failure(ok("陆雪琪（说）：嗯。"), "格式不合规")
 
     def test_one_retry_recovers(self):
         _, result = run_a1(first_character_call([ok("")]))
@@ -76,7 +76,7 @@ class TechnicalFailureTest(unittest.TestCase):
         self.assertEqual([e.kind for e in result.events], ["failure"])
 
     def test_explicit_silence_is_not_failure(self):
-        _, result = run_a1(first_character_call([ok("【心声】随他去。")]))
+        _, result = run_a1(first_character_call([ok("陆雪琪（心声）：随他去。")]))
         call = next(c for c in result.calls if c.kind == "character")
         self.assertEqual(call.outcome, "ok")
         silent = [e for e in result.events if e.kind == "character" and e.silent]

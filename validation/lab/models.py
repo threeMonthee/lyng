@@ -137,20 +137,21 @@ class FakeModel:
         n = self.calls
         kind = purpose["kind"]
         if kind == "opening":
-            text = f"【叙事】（替身开场 · {purpose['scene']}）"
+            text = f"（替身开场 · {purpose['scene']}）"
         elif kind == "closing":
-            text = "【叙事】（替身收尾）"
+            text = "（替身收尾）"
         elif kind == "consent":
-            text = "【判定】未拒绝"
+            text = "判定：未拒绝"
         elif kind == "round":
-            narration = f"【叙事】（替身叙事 {n}）\n" if purpose["step"] in ("做", "推进") else ""
-            text = f"{narration}【反应】{'、'.join(purpose['candidates'])}"
+            narration = f"（替身叙事 {n}）" if purpose["step"] in ("做", "推进") else "无"
+            text = f"叙事：{narration}\n反应：{'、'.join(purpose['candidates']) or '无'}"
         elif kind == "character":
             name = purpose["name"]
             if n % 5 == 0:
-                text = f"【心声】（{name}的替身心声 {n}）"
+                text = f"{name}（心声）：（{name}的替身心声 {n}）"
             else:
-                text = f"【行】{name}抬眼看了一下。\n【说】（{name}的替身台词 {n}）\n【心声】（{name}的替身心声 {n}）"
+                text = (f"{name}（行）：{name}抬眼看了一下。\n{name}（说）：（{name}的替身台词 {n}）\n"
+                        f"{name}（心声）：（{name}的替身心声 {n}）")
         else:
             raise ValueError(f"未知调用：{kind}")
         return Completion(text, "stop", self.cost_per_call, {"prompt_tokens": 0, "completion_tokens": 0, "reasoning_tokens": None})

@@ -12,7 +12,7 @@ def run_c1(consent_answers):
 
     def hook(purpose, n):
         if purpose["kind"] == "consent":
-            return answers.pop(0) if answers else ok("【判定】未拒绝")
+            return answers.pop(0) if answers else ok("判定：未拒绝")
         return None
 
     model = RecordingFake(hook)
@@ -34,7 +34,7 @@ class ConsentGateTest(unittest.TestCase):
         self.assertEqual(len(model.prompts_for("consent")), 3)
 
     def test_refusal_turns_every_later_gated_step_into_waiting(self):
-        model, result = run_c1([ok("【判定】未拒绝"), ok("【判定】拒绝")])
+        model, result = run_c1([ok("判定：未拒绝"), ok("判定：拒绝")])
         acts = user_actions(result)
         self.assertEqual(acts[3], ("做", "握住她的手。"))
         self.assertEqual(acts[6], ("静候", ""))
@@ -56,7 +56,7 @@ class ConsentGateTest(unittest.TestCase):
     def test_consent_check_sees_her_inner_voice(self):
         model, _ = run_c1([])
         second = model.prompts_for("consent")[1]
-        self.assertIn("陆雪琪（心里）", second)
+        self.assertIn("陆雪琪（心声）", second)
 
 
 if __name__ == "__main__":

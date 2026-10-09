@@ -24,7 +24,7 @@ class BudgetTest(unittest.TestCase):
         self.assertEqual(result.calls[-1].attempts, [])
 
     def test_stops_when_cost_missing(self):
-        model = RecordingFake(lambda p, n: Completion("【叙事】夜。", "stop", None))
+        model = RecordingFake(lambda p, n: Completion("夜。", "stop", None))
         result = SceneRun(DS, DS.scenes["A1"], "含蓄", model, Ledger(1.0), 1000).run()
         self.assertEqual(result.status, "stopped")
         self.assertIn("未返回费用", result.reason)

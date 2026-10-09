@@ -70,5 +70,25 @@ class PromptSnapshotTest(unittest.TestCase):
         self.check("consent_C1", prompts.consent_messages(DS.scenes["C1"], events))
 
 
+class LengthRuleTest(unittest.TestCase):
+    """圣经 §4.7“篇幅跟着场景走”写进了人物与叙事者的每一种 Prompt。"""
+
+    def test_character_prompt_carries_length_rule(self):
+        for scene in DS.scenes.values():
+            for name in scene.ai_characters:
+                text = dump(prompts.character_messages(DS, scene, scene.scales[0], name, []))
+                self.assertIn("以说为主，动作一两笔带过", text)
+                self.assertIn("亲密或打斗的时候，话少，动作与细节写足", text)
+
+    def test_narrator_prompts_carry_length_rule(self):
+        scene = DS.scenes["B1"]
+        system = prompts.narrator_system(DS, scene, "含蓄")
+        self.assertIn("每次出声只写一两句，点到为止", system)
+        for messages in (prompts.narrator_opening_messages(DS, scene, "含蓄"),
+                         prompts.narrator_round_messages(DS, scene, "含蓄", [], scene.script[0]),
+                         prompts.narrator_closing_messages(DS, scene, "含蓄", [])):
+            self.assertIn("一两句", messages[-1]["content"])
+
+
 if __name__ == "__main__":
     unittest.main()

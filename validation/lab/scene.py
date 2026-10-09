@@ -236,7 +236,7 @@ class SceneRun:
             turn = self._call(
                 {"kind": "character", "scene": scene.id, "name": name},
                 prompts.character_messages(ds, scene, scale, name, self.events, self.previous),
-                parse_turn,
+                lambda t, name=name: parse_turn(t, name),
             )
             if turn is None:
                 self._fail(name, "技术失败")

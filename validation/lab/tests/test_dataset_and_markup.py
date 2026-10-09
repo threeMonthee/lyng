@@ -2,7 +2,9 @@ import unittest
 
 from tests.support import DS
 
+from events import Event
 from markup import FormatError, parse_consent, parse_narration, parse_round, parse_turn
+from prompts import perceive
 
 
 class DatasetTest(unittest.TestCase):
@@ -26,50 +28,69 @@ class DatasetTest(unittest.TestCase):
 
 class MarkupTest(unittest.TestCase):
     def test_turn(self):
-        t = parse_turn("【行】她转过身。\n【说】你来了。\n【行】她没有看他。\n【心声】终于。")
+        t = parse_turn("陆雪琪（行）：她转过身。\n陆雪琪（说）：你来了。\n陆雪琪（行）：她没有看他。\n陆雪琪（心声）：终于。", "陆雪琪")
         self.assertEqual(t.beats, (("行", "她转过身。"), ("说", "你来了。"), ("行", "她没有看他。")))
         self.assertEqual(t.inner, "终于。")
         self.assertFalse(t.silent)
 
     def test_inner_voice_only_is_silence(self):
-        t = parse_turn("【心声】随他去。")
+        t = parse_turn("陆雪琪（心声）：随他去。", "陆雪琪")
         self.assertTrue(t.silent)
         self.assertEqual(t.beats, ())
 
     def test_multiline_block(self):
-        t = parse_turn("【说】第一句。\n第二句。\n【心声】嗯。")
+        t = parse_turn("陆雪琪（说）：第一句。\n第二句。\n陆雪琪（心声）：嗯。", "陆雪琪")
         self.assertEqual(t.beats, (("说", "第一句。\n第二句。"),))
+
+    def test_output_reads_back_as_the_same_perception(self):
+        """人物的输出与它读到的感知材料是同一种写法：解析后再写成感知材料，一字不差。"""
+        text = "陆雪琪（行）：她把剑收回鞘中。\n陆雪琪（说）：你走吧。\n陆雪琪（心声）：别走。"
+        turn = parse_turn(text, "陆雪琪")
+        event = Event(1, "character", speaker="陆雪琪", beats=turn.beats, inner=turn.inner, silent=turn.silent)
+        self.assertEqual(perceive([event], "陆雪琪"), text)
 
     def test_turn_rejects(self):
         for bad in (
             "",
-            "前言\n【说】你好。\n【心声】嗯。",
-            "【说】你好。",
-            "【心声】嗯。\n【说】你好。",
-            "【说】你好。\n【心声】嗯。\n【心声】又一句。",
-            "【不开口】\n【心声】嗯。",
-            "【心声】",
-            "【想】你好。\n【心声】嗯。",
-            "【说】\n【心声】嗯。",
+            "前言\n陆雪琪（说）：你好。\n陆雪琪（心声）：嗯。",
+            "陆雪琪（说）：你好。",
+            "陆雪琪（心声）：嗯。\n陆雪琪（说）：你好。",
+            "陆雪琪（说）：你好。\n陆雪琪（心声）：嗯。\n陆雪琪（心声）：又一句。",
+            "陆雪琪（心声）：",
+            "陆雪琪（想）：你好。\n陆雪琪（心声）：嗯。",
+            "陆雪琪（说）：\n陆雪琪（心声）：嗯。",
+            "【说】你好。\n【心声】嗯。",
+            "叙事：雨停了。\n陆雪琪（心声）：嗯。",
         ):
             with self.assertRaises(FormatError, msg=bad):
-                parse_turn(bad)
+                parse_turn(bad, "陆雪琪")
+
+    def test_turn_rejects_other_peoples_lines(self):
+        with self.assertRaises(FormatError) as ctx:
+            parse_turn("陆雪琪（说）：你说。\n碧瑶（说）：我偏不。\n陆雪琪（心声）：嗯。", "陆雪琪")
+        self.assertIn("写了别人的言行：碧瑶", str(ctx.exception))
 
     def test_round(self):
-        self.assertEqual(parse_round("【反应】陆雪琪、碧瑶", ["陆雪琪", "碧瑶"], False), (None, ["陆雪琪", "碧瑶"]))
-        self.assertEqual(parse_round("【叙事】雨停了。\n【反应】无", ["陆雪琪"], True), ("雨停了。", []))
-        for bad in ("【反应】张小凡", "【叙事】雨。", "【反应】陆雪琪、陆雪琪"):
+        self.assertEqual(parse_round("叙事：无\n反应：陆雪琪、碧瑶", ["陆雪琪", "碧瑶"], False), (None, ["陆雪琪", "碧瑶"]))
+        self.assertEqual(parse_round("叙事：雨停了。\n反应：无", ["陆雪琪"], True), ("雨停了。", []))
+        self.assertEqual(parse_round("反应：陆雪琪。\n叙事：无", ["陆雪琪"], False), (None, ["陆雪琪"]))
+        for bad in ("叙事：无\n反应：张小凡", "叙事：雨。", "反应：陆雪琪", "叙事：无\n反应：陆雪琪、陆雪琪",
+                    "叙事：\n反应：无", "一、不需要。\n二、陆雪琪", "叙事：无\n陆雪琪（行）：她抬眼。\n反应：陆雪琪"):
             with self.assertRaises(FormatError, msg=bad):
                 parse_round(bad, ["陆雪琪", "碧瑶"], False)
         with self.assertRaises(FormatError):
-            parse_round("【反应】无", ["陆雪琪"], True)
+            parse_round("叙事：无\n反应：无", ["陆雪琪"], True)
 
     def test_narration_and_consent(self):
-        self.assertEqual(parse_narration("【叙事】夜深了。"), "夜深了。")
-        self.assertTrue(parse_consent("【判定】拒绝"))
-        self.assertFalse(parse_consent("【判定】未拒绝"))
-        with self.assertRaises(FormatError):
-            parse_consent("【判定】也许")
+        self.assertEqual(parse_narration("夜深了。\n\n雪还在下。"), "夜深了。\n\n雪还在下。")
+        for bad in ("", "叙事：夜深了。", "夜深了。\n陆雪琪（行）：她抬眼。"):
+            with self.assertRaises(FormatError, msg=bad):
+                parse_narration(bad)
+        self.assertTrue(parse_consent("判定：拒绝"))
+        self.assertFalse(parse_consent("判定：未拒绝"))
+        for bad in ("判定：也许", "拒绝", "判定：拒绝\n判定：未拒绝"):
+            with self.assertRaises(FormatError, msg=bad):
+                parse_consent(bad)
 
 
 if __name__ == "__main__":
