@@ -23,12 +23,12 @@ REPORT-v4：第一个可用版本
    - 每次模型调用记录服务商、耗时、首字耗时、费用、token 与推理 token；可设费用硬上限；设置页可随时换各角色的模型。
    - 单个本地账号，口令从环境读；所有表带 user_id，复合外键保证子行不会挂到别人的父行上。
 
-4. 提交（本地，未推送）：见 git log，共 8 次左右，按里程碑：小修与记录 / 技术设计 / 服务端核心 / 服务端测试 / 客户端 / 修正 / 文档。
+4. 提交（本地，未推送）：见 git log，共 8 次，按里程碑：小修与记录 / 技术设计 / 服务端核心 / 服务端测试 / 客户端 / 修正 / 文档。
 
 
 二、怎么打开
 
-   cp .env.example .env        （你的 .env 已经有 OPENROUTER_API_KEY；我给它追加了 LYNG_USER=me 和一个随机生成的 LYNG_PASSWORD，口令只在 .env 里，没有写进任何文档）
+   你的 .env 已经有 OPENROUTER_API_KEY；我给它追加了 LYNG_USER=me 和一个随机生成的 LYNG_PASSWORD（口令只在 .env 里，没有写进任何文档）。别人从零开始时：cp .env.example .env 再填写。
    scripts/start.sh            （Docker 起 PostgreSQL → 构建 → 运行）
    打开 http://localhost:8080，用 .env 里的 LYNG_PASSWORD 登录。
    不花钱地先看一遍：scripts/start.sh --fake
