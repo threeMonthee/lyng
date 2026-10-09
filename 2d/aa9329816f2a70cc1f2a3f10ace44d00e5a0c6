@@ -1,0 +1,39 @@
+server/src/main/java/app/lyng/model/ModelRole.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 6,8-9,13-22,26-30
+client/src/pages/SettingsPage.tsx
+  s_8e20c42dedb23b::t_22192e4cb12a0a 20-21
+server/src/main/java/app/lyng/scene/SceneRun.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 180
+server/src/main/java/app/lyng/markup/Markup.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 74-79
+server/src/main/java/app/lyng/model/ModelSettings.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 28-33
+server/src/test/java/app/lyng/web/ApiFlowTest.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 167-168
+server/src/test/java/app/lyng/model/ModelGatewayTest.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 80-81
+server/src/test/java/app/lyng/markup/MarkupTest.java
+  s_8e20c42dedb23b::t_22192e4cb12a0a 71-73
+docs/tech-design.md
+  s_8e20c42dedb23b::t_dfad29685deb66 125-126,141,193-195,243-244,248,251,302-305
+README.md
+  s_8e20c42dedb23b::t_0b86604e97fd8d 5-68,72-77
+docs/README.md
+  s_8e20c42dedb23b::t_32917d8e09585b 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2daa9329816f2a70cc1f2a3f10ace44d00e5a0c6",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
