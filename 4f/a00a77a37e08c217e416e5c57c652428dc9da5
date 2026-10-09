@@ -1,0 +1,92 @@
+server/src/test/resources/fixtures/bi-yao.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-45
+server/src/test/java/app/lyng/markup/TurnStreamParserTest.java
+  s_8e20c42dedb23b::t_ef24ec4ac7d0dd 1-73,75-97
+  s_8e20c42dedb23b::t_07e534218b8e9d 74
+server/src/test/resources/fixtures/world.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-49
+server/src/test/java/app/lyng/support/ApiClient.java
+  s_8e20c42dedb23b::t_c25ce1eb4ca468 1-97
+server/src/test/java/app/lyng/support/IntegrationTest.java
+  s_8e20c42dedb23b::t_5a0fff2504e61f 1-59
+server/src/test/java/app/lyng/prompt/PromptSnapshotTest.java
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-199
+server/src/test/resources/snapshots/narrator_with_previous_scene.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-207
+server/src/test/resources/snapshots/recall.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-127
+server/src/test/resources/fixtures/opening-A2.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-5
+server/src/test/resources/snapshots/parity/narrator_round_A1_pair.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-213
+server/src/test/resources/snapshots/character_first_scene.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-135
+server/pom.xml
+  s_8e20c42dedb23b::t_5a0fff2504e61f 62-68
+server/src/test/java/app/lyng/support/StoryFixture.java
+  s_8e20c42dedb23b::t_a7eb8fe5433109 1-55
+server/src/test/resources/snapshots/parity/narrator_opening_A1.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-208
+server/src/test/java/app/lyng/support/TestModelConfig.java
+  s_8e20c42dedb23b::t_5a0fff2504e61f 1-15
+server/src/test/java/app/lyng/web/ApiFlowTest.java
+  s_8e20c42dedb23b::t_c25ce1eb4ca468 1-207
+server/src/test/resources/fixtures/world-narrator.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-24
+server/src/test/resources/snapshots/parity/narrator_closing_A2.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-259
+server/src/test/java/app/lyng/model/ModelGatewayTest.java
+  s_8e20c42dedb23b::t_45e7a39c589bab 1-86
+server/src/test/resources/fixtures/lu-xueqi.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-47
+server/src/test/resources/snapshots/narrator_round_do.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-213
+server/src/test/java/app/lyng/support/ScriptedChatModel.java
+  s_8e20c42dedb23b::t_33f95bd1cc815a 50-53
+  s_8e20c42dedb23b::t_5a0fff2504e61f 1-49,54-84
+server/src/test/resources/fixtures/opening-A1.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-7
+server/src/test/java/app/lyng/support/Fixtures.java
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-30
+server/src/test/resources/snapshots/character_adult_scale.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-127
+server/src/test/java/app/lyng/markup/MarkupTest.java
+  s_8e20c42dedb23b::t_ef24ec4ac7d0dd 1-155
+server/src/test/java/app/lyng/prompt/PerceptionTest.java
+  s_8e20c42dedb23b::t_ef24ec4ac7d0dd 1-69
+server/src/test/resources/snapshots/character_with_past.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-147
+server/src/test/resources/snapshots/group_round_instructions.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-7
+server/src/test/resources/snapshots/draft_new_world.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-30
+server/src/test/resources/snapshots/narrator_round_wait.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-213
+server/src/test/java/app/lyng/scene/SceneBehaviorTest.java
+  s_8e20c42dedb23b::t_33f95bd1cc815a 429,438,459,517
+  s_8e20c42dedb23b::t_a7eb8fe5433109 1-428,430-437,439-458,460-516,518-539
+server/src/test/java/app/lyng/model/OpenRouterChatModelTest.java
+  s_8e20c42dedb23b::t_45e7a39c589bab 1-175
+server/src/test/java/app/lyng/model/BudgetTest.java
+  s_8e20c42dedb23b::t_45e7a39c589bab 1-46
+server/src/test/resources/fixtures/zhang-xiaofan.txt
+  s_8e20c42dedb23b::t_9bc1f72eff5ec6 1-45
+server/src/test/resources/snapshots/draft_existing_world.txt
+  s_8e20c42dedb23b::t_ee6fd8a766d919 1-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4fa00a77a37e08c217e416e5c57c652428dc9da5",
+  "prompts": {},
+  "sessions": {
+    "s_8e20c42dedb23b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d425b74d-a3f3-436b-bd70-035b0da6607c",
+        "model": "unknown"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
