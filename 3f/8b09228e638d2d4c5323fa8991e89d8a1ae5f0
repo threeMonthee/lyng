@@ -1,0 +1,21 @@
+docs/PROJECT_BIBLE.md
+  s_bac33ba06c4f10::t_0367a03f1bc900 111-116,240
+plan/core-validation.md
+  s_bac33ba06c4f10::t_0367a03f1bc900 79,219-251
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3f8b09228e638d2d4c5323fa8991e89d8a1ae5f0",
+  "prompts": {},
+  "sessions": {
+    "s_bac33ba06c4f10": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7f86136-5a08-4049-a696-7f8cf2e60db2",
+        "model": "unknown"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
