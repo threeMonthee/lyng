@@ -68,6 +68,9 @@ class MarkupTest {
     @Test
     void pairRound() {
         assertThat(Markup.parsePairRound("叙事：无")).isEmpty();
+        assertThat(Markup.parsePairRound("叙事：无。")).as("模型常把无写成无。").isEmpty();
+        assertThat(Markup.parsePairRound("叙事：无 ")).isEmpty();
+        assertThat(Markup.parsePairRound("叙事：无人应门。")).isEqualTo("无人应门。");
         assertThat(Markup.parsePairRound("叙事：雪停了。")).isEqualTo("雪停了。");
         for (String bad : List.of("", "无", "叙事：", "叙事：无\n轮到：陆雪琪", "叙事：无\n叙事：雪停了。", "雪停了。")) {
             assertThatThrownBy(() -> Markup.parsePairRound(bad)).as(bad).isInstanceOf(FormatError.class);

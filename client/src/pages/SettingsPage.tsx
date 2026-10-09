@@ -17,7 +17,8 @@ interface Usage {
 
 const ROLES: [string, string][] = [
   ["character", "人物"],
-  ["narrator", "叙事者"],
+  ["narrator", "叙事者（开场与收尾）"],
+  ["narrator_round", "叙事者（逐轮决定）"],
   ["creation", "创作"],
   ["recall", "回想"],
 ];

@@ -71,7 +71,12 @@ public final class Markup {
         if (body.isEmpty()) {
             throw new FormatError("“叙事：”不能为空；不出声就写“无”");
         }
-        return body.equals("无") ? "" : body;
+        return isNone(body) ? "" : body;
+    }
+
+    /** “无”，模型常写成“无。”“无！”：算不出声。 */
+    private static boolean isNone(String body) {
+        return body.replaceAll("[。.！!\\s]+$", "").equals("无");
     }
 
     /** 群戏一轮的决定：叙事（没有则为 null）与轮到的人物。 */

@@ -25,7 +25,12 @@ public class ModelSettings {
                 .params(userId, PREFIX + role.key())
                 .query(String.class).optional()
                 .map(ModelChoice::parse)
-                .orElseGet(props::defaultChoice);
+                .orElseGet(() -> defaultFor(role));
+    }
+
+    private ModelChoice defaultFor(ModelRole role) {
+        ModelChoice base = props.defaultChoice();
+        return role.defaultReasoning() == null ? base : new ModelChoice(base.model(), role.defaultReasoning());
     }
 
     public Map<ModelRole, ModelChoice> all(UUID userId) {

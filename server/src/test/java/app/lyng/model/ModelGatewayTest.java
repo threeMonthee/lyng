@@ -77,7 +77,8 @@ class ModelGatewayTest extends IntegrationTest {
         narration();
         ChatRequest sent = model.requests().getFirst();
         assertThat(sent.choice()).isEqualTo(new ModelChoice("other/model", "off"));
-        assertThat(settings.choice(userId, ModelRole.CHARACTER).model()).isEqualTo("deepseek/deepseek-v4.1-flash");
+        assertThat(settings.choice(userId, ModelRole.CHARACTER)).isEqualTo(new ModelChoice("deepseek/deepseek-v4.1-flash", null));
+        assertThat(settings.choice(userId, ModelRole.NARRATOR_ROUND)).isEqualTo(new ModelChoice("deepseek/deepseek-v4.1-flash", "off"));
 
         settings.save(userId, ModelRole.NARRATOR, "");
         assertThat(settings.choice(userId, ModelRole.NARRATOR).model()).isEqualTo("deepseek/deepseek-v4.1-flash");

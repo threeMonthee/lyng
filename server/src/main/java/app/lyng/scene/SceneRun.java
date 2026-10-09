@@ -177,7 +177,7 @@ final class SceneRun {
 
     private Decision decide(NarratorContext ctx, List<SceneEvent> before, SceneEvent action) {
         try {
-            String narration = gateway.call(userId, ModelRole.NARRATOR, purpose("round", action.action()),
+            String narration = gateway.call(userId, ModelRole.NARRATOR_ROUND, purpose("round", action.action()),
                     Prompts.narratorRound(ctx, before, action), () -> Attempt.whole(Markup::parsePairRound));
             return new Decision(narration, null);
         } catch (CallFailure f) {

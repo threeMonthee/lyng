@@ -164,6 +164,8 @@ class ApiFlowTest extends IntegrationTest {
 
         assertThat(model.requests("character").getFirst().choice().model()).isEqualTo("other/model");
         assertThat(model.requests("round").getFirst().choice().model()).isEqualTo("deepseek/deepseek-v4.1-flash");
+        assertThat(model.requests("round").getFirst().choice().reasoning()).as("逐轮决定默认关闭推理").isEqualTo("off");
+        assertThat(model.requests("character").getFirst().choice().reasoning()).isEqualTo("off"); // 用户设置里写了 @off
         assertThat(api.put("/settings", Map.of("character", "x/y@turbo")).status()).isEqualTo(400);
     }
 
