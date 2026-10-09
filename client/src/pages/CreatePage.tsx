@@ -132,7 +132,7 @@ export function CreatePage() {
             onChange={(e) => setRequest(e.target.value)}
           />
         </Group>
-        {busy && <p className="hint">正在生成，可能要半分钟…</p>}
+        {busy && <p className="hint">正在生成，开着推理的话可能要一两分钟…</p>}
         <ErrorLine message={error} onRetry={generate} />
         <div className="actions">
           <button className="primary" onClick={generate} disabled={busy || !request.trim()}>

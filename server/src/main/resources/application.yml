@@ -32,7 +32,7 @@ lyng:
     base-url: https://openrouter.ai/api/v1
     default-model: ${LYNG_MODEL:deepseek/deepseek-v4.1-flash}
     default-reasoning: ${LYNG_REASONING:}
-    preferred-provider: ${LYNG_PROVIDER:DeepSeek}
+    preferred-provider: ${LYNG_PROVIDER:Parasail}
     max-tokens: 8000
     backoff-ms: 3000
     header-timeout-sec: 60
