@@ -1,0 +1,18 @@
+# 本机开发用的 PostgreSQL。数据放在 .postgres-data/（已 gitignore）。
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: lyng-postgres
+    environment:
+      POSTGRES_DB: lyng
+      POSTGRES_USER: lyng
+      POSTGRES_PASSWORD: lyng
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ./.postgres-data:/var/lib/postgresql/18/docker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lyng -d lyng"]
+      interval: 3s
+      timeout: 3s
+      retries: 20

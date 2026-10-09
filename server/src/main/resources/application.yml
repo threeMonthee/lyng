@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: lyng
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${LYNG_DB_URL:jdbc:postgresql://localhost:5432/lyng}
+    username: ${LYNG_DB_USER:lyng}
+    password: ${LYNG_DB_PASSWORD:lyng}
+  mvc:
+    async:
+      request-timeout: -1
+  web:
+    resources:
+      static-locations: file:${LYNG_CLIENT_DIR:../client/dist/}
+
+server:
+  port: ${LYNG_PORT:8080}
+
+lyng:
+  auth:
+    user: ${LYNG_USER:me}
+    password: ${LYNG_PASSWORD:}
+  model:
+    backend: ${LYNG_MODEL_BACKEND:openrouter}
+    api-key: ${OPENROUTER_API_KEY:}
+    base-url: https://openrouter.ai/api/v1
+    default-model: ${LYNG_MODEL:deepseek/deepseek-v4.1-flash}
+    default-reasoning: ${LYNG_REASONING:}
+    preferred-provider: ${LYNG_PROVIDER:DeepSeek}
+    max-tokens: 8000
+    backoff-ms: 3000
+    header-timeout-sec: 60
+    idle-timeout-sec: 90
+    budget-usd: ${LYNG_BUDGET_USD:}
+  memory:
+    recent-scenes: 2
+    max-earlier-recollections: 20
+  fake:
+    chunk-chars: 6
+    chunk-delay-ms: ${LYNG_FAKE_DELAY_MS:0}
