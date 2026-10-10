@@ -13,7 +13,7 @@
 
   <groupId>app.lyng</groupId>
   <artifactId>lyng-server</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <name>lyng-server</name>
 
   <properties>
@@ -31,39 +31,14 @@
       <artifactId>spring-boot-starter-jdbc</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-flyway</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-crypto</artifactId>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.53.2.1</version>
     </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.zonky.test</groupId>
-      <artifactId>embedded-postgres</artifactId>
-      <version>2.2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <!-- Apple Silicon 上嵌入式 PostgreSQL 的二进制；其他平台由 embedded-postgres 传递依赖带入 -->
-    <dependency>
-      <groupId>io.zonky.test.postgres</groupId>
-      <artifactId>embedded-postgres-binaries-darwin-arm64v8</artifactId>
-      <version>18.4.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

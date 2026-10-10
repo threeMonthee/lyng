@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: lyng
+  config:
+    import:
+      - optional:file:./.env[.properties]
+      - optional:file:../.env[.properties]
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:sqlite:${LYNG_DB:../data/lyng.db}?journal_mode=WAL&foreign_keys=on&busy_timeout=5000
+    # 单用户、单进程：一个连接最省事，写入天然串行；模型调用期间不占连接
+    hikari:
+      maximum-pool-size: 1
+  sql:
+    init:
+      mode: always
+  web:
+    resources:
+      static-locations: file:${LYNG_CLIENT_DIR:../client/dist/}
+
+server:
+  address: ${LYNG_HOST:127.0.0.1}
+  port: ${LYNG_PORT:8080}
+
+lyng:
+  model:
+    backend: ${LYNG_MODEL_BACKEND:openrouter}
+    api-key: ${OPENROUTER_API_KEY:}
+    base-url: https://openrouter.ai/api/v1
+    # 各角色的模型：写法是“模型ID”或“模型ID@推理设置”（off / low / medium / high）；没写的角色用 default
+    default-spec: ${LYNG_MODEL:deepseek/deepseek-v4.1-flash}
+    character: ${LYNG_MODEL_CHARACTER:}
+    narrator: ${LYNG_MODEL_NARRATOR:}
+    narrator-round: ${LYNG_MODEL_NARRATOR_ROUND:}
+    creation: ${LYNG_MODEL_CREATION:}
+    recall: ${LYNG_MODEL_RECALL:}
+    provider: ${LYNG_PROVIDER:Parasail}
+    budget-usd: ${LYNG_BUDGET_USD:}
+    max-tokens: 8000
+    backoff-ms: 3000
+    header-timeout-sec: 60
+    idle-timeout-sec: 90
+    fake-delay-ms: ${LYNG_FAKE_DELAY_MS:0}
