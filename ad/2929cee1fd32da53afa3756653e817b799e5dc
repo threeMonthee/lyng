@@ -1,0 +1,124 @@
+server/pom.xml
+  s_02854569e92952::t_8293ee37823a83 16,34-36
+server/src/test/java/app/lyng/web/ApiFlowTest.java
+  s_02854569e92952::t_9aee38ce056d01 10-96
+  s_02854569e92952::t_d0e9c194d3906c 1-9,97-98
+server/src/main/resources/schema.sql
+  s_02854569e92952::t_5c9f3c3395e1fc 1-89
+server/src/main/java/app/lyng/model/FakeModel.java
+  s_02854569e92952::t_68f8c9a3234415 122-137
+  s_02854569e92952::t_a41409744e1d32 1-121,138-139
+server/src/main/java/app/lyng/model/FormatError.java
+  s_02854569e92952::t_a97d09839747b5 3
+  s_02854569e92952::t_47aa343ebf5a8c 1-2,4-9
+server/src/test/resources/snapshots/parity/narrator_round_A2.txt
+  s_02854569e92952::t_01e1ca6cdbe768 1-265
+server/src/main/java/app/lyng/store/Store.java
+  s_02854569e92952::t_ac8841dc48477d 71,76,93,98,103,116,121,162,167,173,254,258,262
+  s_02854569e92952::t_0eb0527b6a58cb 203-204,206-208,211-212
+  s_02854569e92952::t_5feec3e219e2b3 1-70,72-75,77-92,94-97,99-102,104-115,117-120,122-161,163-166,168-172,174-202,213-241,245-248,253,255-257,259-261,263-270
+  s_02854569e92952::t_01ac1f6ce34cd6 205,209-210
+  s_02854569e92952::t_38df872fe192f1 242-244,249-252
+server/src/main/java/app/lyng/model/Role.java
+  s_02854569e92952::t_a97d09839747b5 1-12
+server/src/main/java/app/lyng/web/Sse.java
+  s_02854569e92952::t_e8fb5ac1ea8494 1-80
+server/src/test/java/app/lyng/story/SceneTest.java
+  s_02854569e92952::t_423ef19a3f230d 1-455
+server/src/test/java/app/lyng/story/TurnStreamTest.java
+  s_02854569e92952::t_36dc62bd7eb557 1-96,99-100
+  s_02854569e92952::t_f76e0250dd779c 97-98
+server/src/test/java/app/lyng/support/IntegrationTest.java
+  s_02854569e92952::t_614114d791a3ff 3-89
+  s_02854569e92952::t_414cefb970b82c 1-2,90
+server/src/main/java/app/lyng/story/Recall.java
+  s_02854569e92952::t_be1c8ba0afcc14 1-88,90-105
+  s_02854569e92952::t_6015f8c238c661 89
+server/src/test/java/app/lyng/story/MarkupTest.java
+  s_02854569e92952::t_0324a64b328c6d 1-162
+server/src/main/java/app/lyng/model/Attempt.java
+  s_02854569e92952::t_a97d09839747b5 5-16
+  s_02854569e92952::t_5d6377e74687df 1-4,17-18
+server/src/test/java/app/lyng/support/Recorder.java
+  s_02854569e92952::t_614114d791a3ff 1-48
+server/src/test/java/app/lyng/support/ApiClient.java
+  s_02854569e92952::t_fd8d06ed203b6d 16-25
+  s_02854569e92952::t_21a9011eadfa33 1-15,26-96
+server/src/main/java/app/lyng/model/ModelProperties.java
+  s_02854569e92952::t_379561d9e69ae0 5-37
+  s_02854569e92952::t_46c9804a3f6d99 1-4,38-39
+server/src/main/java/app/lyng/model/CallFailure.java
+  s_02854569e92952::t_a97d09839747b5 3-7
+  s_02854569e92952::t_40522dcfc85108 1-2,8-9
+server/src/main/java/app/lyng/story/SceneRunner.java
+  s_02854569e92952::t_d5ec18fbf98e2b 1-360
+server/src/main/java/app/lyng/LyngApplication.java
+  s_02854569e92952::t_08d8034ed15996 3-34
+  s_02854569e92952::t_07b9a8af81c8de 1-2,35
+server/src/main/java/app/lyng/web/Api.java
+  s_02854569e92952::t_7c608c0d785ab4 1-182
+server/src/main/java/app/lyng/model/Choice.java
+  s_02854569e92952::t_a97d09839747b5 1-28
+server/src/test/resources/fixtures/opening-B3.txt
+  s_02854569e92952::t_01e1ca6cdbe768 1-3
+server/src/test/resources/snapshots/parity/narrator_round_B3.txt
+  s_02854569e92952::t_01e1ca6cdbe768 1-212
+server/src/test/java/app/lyng/support/Fixtures.java
+  s_02854569e92952::t_ad1435bbda7fa4 17
+  s_02854569e92952::t_1cfc2921a97b40 1-16,18-31
+server/src/main/java/app/lyng/model/Gateway.java
+  s_02854569e92952::t_e4e337782eaee1 1-141
+server/src/main/resources/application.yml
+  s_02854569e92952::t_0fabebb4116cf8 12-32,34-45
+  s_02854569e92952::t_379561d9e69ae0 33
+  s_02854569e92952::t_008edfaae7ef69 1-11
+server/src/main/java/app/lyng/ApiError.java
+  s_02854569e92952::t_08d8034ed15996 1-28
+server/src/main/java/app/lyng/web/Errors.java
+  s_02854569e92952::t_e8fb5ac1ea8494 1-24
+server/src/main/java/app/lyng/story/Markup.java
+  s_02854569e92952::t_7f445795a931c0 320-321
+  s_02854569e92952::t_396eddd1d48b85 1-319,322-370
+server/src/main/java/app/lyng/story/Prompts.java
+  s_02854569e92952::t_c2970567715ab0 1-397
+server/src/test/java/app/lyng/model/BudgetTest.java
+  s_02854569e92952::t_9aee38ce056d01 5-33
+  s_02854569e92952::t_cd3dcb4adb7317 1-4,34-35
+server/src/main/java/app/lyng/model/OpenRouter.java
+  s_02854569e92952::t_5cf17a817efc52 1-208
+server/src/main/java/app/lyng/model/ModelException.java
+  s_02854569e92952::t_a97d09839747b5 3-10
+  s_02854569e92952::t_6606fb83c24849 1-2,11-18
+server/src/main/java/app/lyng/story/Creation.java
+  s_02854569e92952::t_541a623acc1995 1-93
+server/src/main/java/app/lyng/story/Contexts.java
+  s_02854569e92952::t_c03aecf9be78c9 1-103
+server/src/main/java/app/lyng/model/ChatModel.java
+  s_02854569e92952::t_a97d09839747b5 3-34
+  s_02854569e92952::t_647f181c84b7d3 1-2,35
+server/src/test/java/app/lyng/support/ScriptedModel.java
+  s_02854569e92952::t_614114d791a3ff 1-85
+server/src/test/java/app/lyng/story/PromptSnapshotTest.java
+  s_02854569e92952::t_dbeda587c475c0 1-217
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ad2929cee1fd32da53afa3756653e817b799e5dc",
+  "prompts": {},
+  "humans": {
+    "h_7a0f0a5af51c1b": {
+      "author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  },
+  "sessions": {
+    "s_02854569e92952": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6bf4c018-58ec-4f67-be1a-13c3e54fb70a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
