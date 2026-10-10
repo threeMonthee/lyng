@@ -1,0 +1,24 @@
+docs/tech-design.md
+  s_02854569e92952::t_12747758c7dfdd 3-4,6,8-17,19,21,23-28,30-43,46-47,49-53,56,59-60,62,64,68,70-73,75,77,79,81,83,86-90,93,95,99-104,106,108-109,111,113,115,119,121,123,125,127-128,130,132,134,136-139,143-146,148,150-153,155,157,159-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c4b62b4caf29502188d0d96dad66d40e220ea474",
+  "prompts": {},
+  "humans": {
+    "h_7a0f0a5af51c1b": {
+      "author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  },
+  "sessions": {
+    "s_02854569e92952": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6bf4c018-58ec-4f67-be1a-13c3e54fb70a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
