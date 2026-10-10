@@ -8,7 +8,7 @@
 
 1. [requires.md](requires.md)：真实需求、成功标准与产品原则；
 2. [PROJECT_BIBLE.md](PROJECT_BIBLE.md)：领域概念（你、人物、一场戏、世界与叙事者、时间与记忆）、规则与已确认决定；
-3. [tech-design.md](tech-design.md)：第一个可用版本的技术设计（草案，待用户复核）；
+3. [tech-design.md](tech-design.md)：第一个可用版本的技术设计（2026-10-10 重写）；
 4. 其他专项设计：按需要新增，不预先铺设。
 
 ## 参考资料（不是约束）
