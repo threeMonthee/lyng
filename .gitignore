@@ -8,6 +8,7 @@ runtime.env
 logs/
 *.log
 .postgres-data/
+data/
 
 ### Java / Maven / Gradle ###
 target/

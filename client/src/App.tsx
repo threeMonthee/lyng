@@ -1,41 +1,74 @@
-import { useEffect, useState } from "react";
-import { api, setUnauthorizedHandler } from "./api";
-import { CharacterPage } from "./pages/CharacterPage";
-import { CreatePage } from "./pages/CreatePage";
-import { HomePage } from "./pages/HomePage";
-import { LoginPage } from "./pages/LoginPage";
-import { NewScenePage } from "./pages/NewScenePage";
-import { ScenePage } from "./pages/ScenePage";
-import { SettingsPage } from "./pages/SettingsPage";
+import { useCallback, useEffect, useState } from "react";
+import { api } from "./api";
+import { CharacterPage } from "./CharacterPage";
+import { CreatePage } from "./CreatePage";
+import { Home } from "./Home";
+import { NewScenePage } from "./NewScenePage";
 import { useRoute } from "./route";
+import { ScenePage } from "./ScenePage";
+import { Sidebar } from "./Sidebar";
+import type { Overview } from "./types";
+import { UsagePage } from "./UsagePage";
+import { WorldPage } from "./WorldPage";
 
 export function App() {
   const route = useRoute();
-  const [user, setUser] = useState<string | null | undefined>(undefined);
+  const [overview, setOverview] = useState<Overview | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setUnauthorizedHandler(() => setUser(null));
-    api<{ name: string }>("/me")
-      .then((me) => setUser(me.name))
-      .catch(() => setUser(null));
+  const refresh = useCallback(async () => {
+    try {
+      setOverview(await api<Overview>("/overview"));
+      setError(null);
+    } catch (e) {
+      setError((e as Error).message);
+    }
   }, []);
 
-  if (user === undefined) return <div className="center-note">…</div>;
-  if (user === null) return <LoginPage onLogin={setUser} />;
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
-  const logout = () => api("/logout", "POST").finally(() => setUser(null));
-  switch (route.name) {
-    case "create":
-      return <CreatePage />;
-    case "new":
-      return <NewScenePage query={route.query} />;
+  const [section, id] = route.path;
+  let page;
+  switch (section) {
     case "scene":
-      return <ScenePage key={route.id} id={route.id} />;
+      page = <ScenePage key={id} id={id} refresh={refresh} />;
+      break;
+    case "new":
+      page = overview && <NewScenePage key={route.query.toString()} overview={overview} query={route.query} />;
+      break;
+    case "create":
+      page = overview && <CreatePage key={route.query.toString()} overview={overview} query={route.query} refresh={refresh} />;
+      break;
     case "character":
-      return <CharacterPage id={route.id} />;
-    case "settings":
-      return <SettingsPage onLogout={logout} />;
+      page = <CharacterPage key={id} id={id} />;
+      break;
+    case "world":
+      page = <WorldPage key={id} id={id} />;
+      break;
+    case "usage":
+      page = <UsagePage />;
+      break;
     default:
-      return <HomePage />;
+      page = overview && <Home overview={overview} />;
   }
+
+  return (
+    <div className="app">
+      <Sidebar overview={overview} route={route} />
+      <main className="main">
+        {error && !overview ? (
+          <div className="center-state">
+            <p>{error}</p>
+            <button className="btn" onClick={() => void refresh()}>
+              再试一次
+            </button>
+          </div>
+        ) : (
+          page
+        )}
+      </main>
+    </div>
+  );
 }

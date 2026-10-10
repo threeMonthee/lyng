@@ -68,7 +68,7 @@ public class Store {
     // ---- 世界与人物 ----
 
     public List<World> worlds() {
-        return jdbc.sql("SELECT * FROM worlds WHERE user_id = ? ORDER BY created_at").param(USER).query(this::mapWorld).list();
+        return jdbc.sql("SELECT * FROM worlds WHERE user_id = ? ORDER BY created_at, rowid").param(USER).query(this::mapWorld).list();
     }
 
     public World world(String id) {
@@ -89,12 +89,12 @@ public class Store {
     }
 
     public List<Character> characters() {
-        return jdbc.sql("SELECT * FROM characters WHERE user_id = ? ORDER BY created_at").param(USER)
+        return jdbc.sql("SELECT * FROM characters WHERE user_id = ? ORDER BY created_at, rowid").param(USER)
                 .query(this::mapCharacter).list();
     }
 
     public List<Character> charactersOf(String worldId) {
-        return jdbc.sql("SELECT * FROM characters WHERE user_id = ? AND world_id = ? ORDER BY created_at")
+        return jdbc.sql("SELECT * FROM characters WHERE user_id = ? AND world_id = ? ORDER BY created_at, rowid")
                 .params(USER, worldId).query(this::mapCharacter).list();
     }
 

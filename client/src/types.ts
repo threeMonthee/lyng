@@ -1,84 +1,80 @@
-// 与服务端 web 包里的 JSON 一一对应。
+// 与服务端接口（server/.../web/Api.java）一一对应。
 
-export interface Beat {
-  tag: "行" | "说";
-  text: string;
-}
+export type LineKind = "narration" | "say" | "do" | "wait" | "inner";
 
-export type EventKind = "narration" | "user" | "character" | "failure" | "resolved";
-
-export interface SceneEvent {
+export type Line = {
   seq: number;
   round: number;
-  kind: EventKind;
+  kind: LineKind;
   speakerId: string | null;
-  speaker: string | null;
-  action: "说" | "做" | "静候" | null;
+  byUser: boolean;
   text: string;
-  beats: Beat[];
-  inner: string | null;
-  silent: boolean;
-  step: "opening" | "narrator" | "character" | "closing" | null;
-  refSeq: number | null;
-  resolved: boolean;
-}
+};
 
-export interface Person {
-  id: string;
-  name: string;
-}
+export type Person = { id: string; name: string };
 
-export interface SceneView {
+export type SceneView = {
   id: string;
   number: number;
-  status: "open" | "ended";
+  worldId: string;
+  worldName: string;
+  cast: Person[];
+  possessedId: string | null;
+  followId: string | null;
   tone: string;
   setup: string;
-  worldId: string;
-  worldName: string;
-  possessed: Person;
-  others: Person[];
-  events: SceneEvent[];
-  opened: boolean;
+  status: "open" | "ended";
+  pending: string[] | null;
+  error: string | null;
+  startedAt: string;
+  endedAt: string | null;
+  lines: Line[];
   busy: boolean;
-}
+};
 
-export interface SceneSummary {
+export type SceneItem = {
   id: string;
   number: number;
-  status: "open" | "ended";
-  worldName: string;
-  possessed: string;
-  others: string[];
-  startedAt: string;
-}
-
-export interface WorldView {
-  id: string;
-  name: string;
-  publicText: string;
-  characters: Person[];
-}
-
-export interface CharacterView {
-  id: string;
   worldId: string;
-  worldName: string;
-  name: string;
-  profile: string;
-  memory: {
-    memories: { sceneNumber: number; text: string }[];
-    relations: { name: string; view: string }[];
-  };
-}
+  cast: string[];
+  possessedId: string | null;
+  status: "open" | "ended";
+  failed: boolean;
+  preview: string | null;
+  startedAt: string;
+};
 
-export interface Draft {
+export type Overview = {
+  worlds: { id: string; name: string }[];
+  characters: { id: string; worldId: string; name: string }[];
+  scenes: SceneItem[];
+  spent: number;
+  budget: number | null;
+  fake: boolean;
+};
+
+export type Draft = {
   world: { name: string; publicText: string; narratorText: string } | null;
   characters: { name: string; profile: string }[];
-}
+};
 
-export interface ModelCall {
-  id: number;
+export type Memory = { sceneId: string; sceneNumber: number; memory: string };
+
+export type CharacterPage = {
+  character: { id: string; worldId: string; name: string; profile: string };
+  worldName: string;
+  memories: Memory[];
+  views: { name: string; text: string }[];
+  scenes: { id: string; number: number; status: "open" | "ended"; startedAt: string; cast: string[] }[];
+};
+
+export type WorldPage = {
+  world: { id: string; name: string; publicText: string; narratorText: string };
+  characters: { id: string; worldId: string; name: string }[];
+};
+
+export type Call = {
+  createdAt: string;
   kind: string;
   subject: string | null;
   model: string;
@@ -87,6 +83,7 @@ export interface ModelCall {
   error: string | null;
   cost: number | null;
   latencyMs: number | null;
-  firstTokenMs: number | null;
   reasoningTokens: number | null;
-}
+};
+
+export type Usage = { spent: number; budget: number | null; fake: boolean; calls: Call[] };
