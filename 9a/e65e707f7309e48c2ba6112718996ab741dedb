@@ -1,0 +1,80 @@
+client/src/api.ts
+  s_02854569e92952::t_0e33fdfe07337e 1,3-10,12-20,24-78
+client/src/NewScenePage.tsx
+  s_02854569e92952::t_ea325b4524de9d 1-160
+client/src/ui.tsx
+  s_02854569e92952::t_03863623407c25 3-4,9-10
+  s_02854569e92952::t_7cb1cffa03db03 124-136,138
+  s_02854569e92952::t_36c854c3d73a02 73-78
+  s_02854569e92952::t_098de9e1e28882 1,6-8,11-13,15-20,25,27-31,35-45,47-61,65-72,79-116,118-120,123,137,139-161
+client/src/icons.tsx
+  s_02854569e92952::t_b9a0fd1180af4e 1-33
+client/src/Sidebar.tsx
+  s_02854569e92952::t_b9a0fd1180af4e 1-77
+client/src/CreatePage.tsx
+  s_02854569e92952::t_8ed33b0ed7279c 1-136
+client/src/CharacterPage.tsx
+  s_02854569e92952::t_fd3c60d476c66e 1-92
+client/src/UsagePage.tsx
+  s_02854569e92952::t_fd3c60d476c66e 1-28,30-76
+  s_02854569e92952::t_7cb1cffa03db03 29
+client/src/ScenePage.tsx
+  s_02854569e92952::t_79b133474addb1 1-41,43-298
+  s_02854569e92952::t_794b2c1c0a35bd 42
+client/src/WorldPage.tsx
+  s_02854569e92952::t_fd3c60d476c66e 1-60
+client/src/blocks.test.ts
+  s_02854569e92952::t_a8567b14014d30 1-60
+.env.example
+  s_02854569e92952::t_e4074f78f88439 1,3,7-15,17
+client/index.html
+  s_02854569e92952::t_0e33fdfe07337e 5
+client/src/styles.css
+  s_02854569e92952::t_c3cb213b081d1a 1-2,5-8,10-22,27-44,53,55,57-58,60-147,149-187,189-221,224-238,241-351
+  s_02854569e92952::t_91287a8ea1e2db 188,240
+  s_02854569e92952::t_7cb1cffa03db03 239
+  s_02854569e92952::t_a8567b14014d30 222-223
+  s_02854569e92952::t_8ded63f2067148 148
+scripts/start.sh
+  s_02854569e92952::t_e4074f78f88439 9,19-20,28
+  s_02854569e92952::t_047652529cefd1 2,10
+client/src/route.ts
+  s_02854569e92952::t_0e33fdfe07337e 3-4,6-9,13,15,23
+client/src/Timeline.tsx
+  s_02854569e92952::t_89b45e4972ddee 1,3-4,6-7,9-11,13-20,22-34,36,38-62,65-80,82-86,88-112
+  s_02854569e92952::t_c35bc7046deab5 2
+  s_02854569e92952::t_b156f8c4e5698d 5,8,12,21,35,37,63-64,81,87,113
+server/src/main/java/app/lyng/store/Store.java
+  s_02854569e92952::t_8ded63f2067148 71,92,97
+client/src/Home.tsx
+  s_02854569e92952::t_b9a0fd1180af4e 1-32
+.gitignore
+  s_02854569e92952::t_7076892ced6d26 11
+client/src/App.tsx
+  s_02854569e92952::t_b9a0fd1180af4e 1-6,8-12,16-17,19-25,28-30,32-34,36-43,45-52,54,56-73
+client/src/types.ts
+  s_02854569e92952::t_0e33fdfe07337e 1,3,5,8,10,12,14,16,21-31,33,35,38-40,42-43,45,47-54,56,59,61-77,87-89
+client/src/blocks.ts
+  s_02854569e92952::t_75b25a2997351f 1,3-6,8-17,19-30,32,35-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9ae65e707f7309e48c2ba6112718996ab741dedb",
+  "prompts": {},
+  "humans": {
+    "h_7a0f0a5af51c1b": {
+      "author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  },
+  "sessions": {
+    "s_02854569e92952": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6bf4c018-58ec-4f67-be1a-13c3e54fb70a",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
