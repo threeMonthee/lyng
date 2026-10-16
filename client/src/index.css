@@ -1,0 +1,143 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f0eee9;
+  --surface-3: #e8e5de;
+  --border: #e3e0d8;
+  --text: #1d1c1a;
+  --muted: #67645e;
+  --faint: #9b978f;
+  --accent: #2f4a46;
+  --accent-soft: #e3ebe8;
+  --accent-fg: #ffffff;
+  --me: #2f4a46;
+  --me-fg: #f6f4ef;
+  --danger: #a8432c;
+  --danger-soft: #f7e6e1;
+  --warn: #8a6a1f;
+  --warn-soft: #f6eedb;
+  --inner: #7b6f93;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 16px rgb(0 0 0 / 0.04);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #121211;
+  --surface: #1b1b19;
+  --surface-2: #242321;
+  --surface-3: #2d2c29;
+  --border: #302e2b;
+  --text: #ebe9e4;
+  --muted: #a29e96;
+  --faint: #6e6a63;
+  --accent: #8fb5ad;
+  --accent-soft: #22302d;
+  --accent-fg: #0f1716;
+  --me: #3a5c56;
+  --me-fg: #eef3f1;
+  --danger: #e08a74;
+  --danger-soft: #3a2420;
+  --warn: #d7b469;
+  --warn-soft: #332b1a;
+  --inner: #b3a6cf;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-fg: var(--accent-fg);
+  --color-me: var(--me);
+  --color-me-fg: var(--me-fg);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-inner: var(--inner);
+  --shadow-card: var(--shadow);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei',
+    system-ui, sans-serif;
+  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* 人物写下的文字用衬线字体，行距宽一些 */
+.prose-life {
+  font-family: var(--font-serif);
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  animation: breathe 1.2s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot {
+    animation: none;
+  }
+}
