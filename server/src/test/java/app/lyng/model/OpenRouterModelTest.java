@@ -86,6 +86,16 @@ class OpenRouterModelTest {
     }
 
     @Test
+    void reasoningIsOnUnlessTurnedOff() throws IOException {
+        OpenRouterModel model = serve(200, sse("{\"choices\":[{\"delta\":{\"content\":\"x\"},\"finish_reason\":\"stop\"}],"
+                + "\"usage\":{\"cost\":0}}"));
+        model.complete(request(null, List.of()), StreamListener.NONE);
+        assertThat(json.readTree(received.get()).path("reasoning").path("enabled").asBoolean(false)).isTrue();
+        model.complete(request("low", List.of()), StreamListener.NONE);
+        assertThat(json.readTree(received.get()).path("reasoning").path("effort").asString()).isEqualTo("low");
+    }
+
+    @Test
     void sendsTheProviderOrderAndReasoningSwitchButNotTheMeta() throws IOException {
         OpenRouterModel model = serve(200, sse("{\"choices\":[{\"delta\":{\"content\":\"x\"},\"finish_reason\":\"stop\"}],"
                 + "\"usage\":{\"cost\":0}}"));

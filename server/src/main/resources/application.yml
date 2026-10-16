@@ -35,7 +35,7 @@ lyng:
     base-url: ${LYNG_OPENROUTER_URL:https://openrouter.ai/api/v1}
     provider: ${LYNG_PROVIDER:Parasail}
     default-model: ${LYNG_MODEL:deepseek/deepseek-v4.1-flash}
-    character: ${LYNG_MODEL_CHARACTER:}
+    character: ${LYNG_MODEL_CHARACTER:@low}
     narrator: ${LYNG_MODEL_NARRATOR:}
     narrator-round: ${LYNG_MODEL_NARRATOR_ROUND:@off}
     check: ${LYNG_MODEL_CHECK:@off}

@@ -131,6 +131,17 @@ class ChatFlowTest extends IntegrationTest {
                 .single()).isEqualTo(2);
     }
 
+    /** 开口时看得到最近二十来个来回，不只是最后几句。 */
+    @Test
+    void theEarlierPartOfAConversationStaysInView() {
+        Conversation c = chats.open(xf, lu);
+        String many = IntStream.rangeClosed(1, 60).mapToObj(i -> "第" + i + "句").collect(Collectors.joining("\n"));
+        model.reply(Purpose.CHARACTER, "陆雪琪（说）：你说了好多。\n陆雪琪（心声）：嗯。");
+        chats.send(c.id(), many, new Recorder());
+        assertThat(user(model.requests(Purpose.CHARACTER).getFirst())).contains("张小凡（说）：第1句\n", "张小凡（说）：第60句");
+        settle();
+    }
+
     @Test
     void comingBackAfterAWhileLetsSomeoneWhoCaresReachOut() {
         Conversation c = chats.open(xf, lu);

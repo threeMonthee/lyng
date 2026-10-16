@@ -48,7 +48,8 @@ public class ChatService {
 
     private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
-    static final int TRANSCRIPT = 40;
+    /** 开口时带上的最近几行（每条消息、每句心声各占一行），约二十来个来回。 */
+    static final int TRANSCRIPT = 120;
     static final int CONSOLIDATE_EVERY = 24;
     static final Duration QUIET = Duration.ofMinutes(30);
     static final int REACH_LIMIT = 3;

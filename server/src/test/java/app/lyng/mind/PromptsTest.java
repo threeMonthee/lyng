@@ -140,13 +140,19 @@ class PromptsTest {
                 .isEqualTo(validated("narrator_closing_A2"));
     }
 
-    /** 2.0 只在人物的 system 里加了一段“可以去翻自己的经历”，其余与验证时一致。 */
+    /**
+     * 一场戏里人物的 user（经过、轮到你、篇幅、写法）仍与验证时逐字一致。system 是 2.0 的：
+     * 加了“可以去翻自己的经历”与“做一个真人”的几段，尺度去掉了“情感与张力写足”（2026-10-16，见 tech-design §4）。
+     */
     @Test
-    void aCharacterAsBornSeesTheValidatedPromptPlusTheRecallHint() throws IOException {
-        String hint = "你记得的不止下面这些。想起某件事、某个人、某句话却记不清时，可以去翻自己的经历；翻不到的，不要编造。\n\n";
-        String actual = dump(Prompts.characterInScene(luAsBorn(), Perceive.scene(A2_LINES, NAMES, LU)));
-        assertThat(actual).contains(hint);
-        assertThat(actual.replace(hint, "")).isEqualTo(validated("character_in_scene_v2"));
+    void aCharacterAsBornKeepsTheValidatedSceneFormat() throws IOException {
+        List<Msg> messages = Prompts.characterInScene(luAsBorn(), Perceive.scene(A2_LINES, NAMES, LU));
+        String validated = validated("character_in_scene_v2");
+        assertThat("=== user ===\n" + messages.getLast().content() + "\n")
+                .isEqualTo(validated.substring(validated.indexOf("=== user ===\n")));
+        assertThat(messages.getFirst().content()).contains(LU_XUEQI.strip(), "【分寸】\n亲密与暴力都可以写，最露骨处留白。")
+                .doesNotContain("情感与张力写足");
+        snapshot("character_in_scene", messages);
     }
 
     // ---- 2.0 新写的部分 ----

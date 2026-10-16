@@ -131,5 +131,8 @@ class GatewayTest extends IntegrationTest {
         model.reply(Purpose.OPENING, "河阳城。");
         gateway.run(spec(Purpose.OPENING), Markup::parseNarration);
         assertThat(model.requests(Purpose.OPENING).getFirst().reasoning()).isNull();
+        model.reply(Purpose.CHARACTER, "陆雪琪（心声）：嗯。");
+        gateway.run(spec(Purpose.CHARACTER), text -> text);
+        assertThat(model.requests(Purpose.CHARACTER).getFirst().reasoning()).isEqualTo("low");
     }
 }

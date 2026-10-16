@@ -91,10 +91,13 @@ public final class OpenRouterModel implements ChatModel {
         body.put("max_tokens", request.maxTokens());
         body.put("stream", true);
         body.put("usage", Map.of("include", true));
+        // 没有指定就明确打开推理，不依赖服务商的默认值
         if ("off".equals(request.reasoning())) {
             body.put("reasoning", Map.of("enabled", false));
         } else if (request.reasoning() != null) {
             body.put("reasoning", Map.of("effort", request.reasoning()));
+        } else {
+            body.put("reasoning", Map.of("enabled", true));
         }
         if (props.provider() != null && !props.provider().isBlank()) {
             body.put("provider", Map.of("order", List.of(props.provider()), "allow_fallbacks", true));
