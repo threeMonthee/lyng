@@ -6,6 +6,8 @@ public enum Purpose {
     NARRATOR("narrator-round", "叙事者"),
     CLOSING("narrator", "叙事者收尾"),
     CHARACTER("character", "开口"),
+    MIND("character", "心里过一遍"),
+    EXPRESS("character", "说出口"),
     CONSENT("check", "同意检查"),
     CONSOLIDATE("consolidate", "整理内心"),
     ASK("create", "构思追问"),

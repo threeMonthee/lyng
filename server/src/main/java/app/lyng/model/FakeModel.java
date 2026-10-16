@@ -47,16 +47,19 @@ public class FakeModel implements ChatModel {
         String last = request.messages().getLast().content();
         int seed = Math.abs((last == null ? "" : last).hashCode() + request.messages().size());
         Map<String, Object> meta = request.meta() == null ? Map.of() : request.meta();
-        if (request.purpose() == Purpose.CHARACTER && !request.tools().isEmpty()
+        if ((request.purpose() == Purpose.CHARACTER || request.purpose() == Purpose.MIND) && !request.tools().isEmpty()
                 && !"tool".equals(request.messages().getLast().role()) && seed % 4 == 0) {
             String args = "{\"query\":\"上一次见面\"}";
-            return new Completion("", null, List.of(new ToolCall("fake-" + seed, "recall", args)), "tool_calls",
+            String tool = request.purpose() == Purpose.MIND ? "search_experiences" : "recall";
+            return new Completion("", null, List.of(new ToolCall("fake-" + seed, tool, args)), "tool_calls",
                     0.0, "fake", tokens(request), 8, 0, 0, System.currentTimeMillis() - started);
         }
         String text = switch (request.purpose()) {
             case OPENING, CLOSING -> pick(NARRATION, seed);
             case NARRATOR -> narrator(meta, seed);
             case CHARACTER -> character(meta, seed);
+            case MIND -> mind(meta, seed);
+            case EXPRESS -> express(meta);
             case CONSENT -> "判定：可以";
             case CONSOLIDATE -> consolidate(meta, seed);
             case ASK -> ask(request);
@@ -109,6 +112,42 @@ public class FakeModel implements ChatModel {
             }
         }
         return out.append(name).append("（心声）：").append(pick(INNER, seed / 7)).toString();
+    }
+
+    /** 心里过一遍的私密交接：有时不说，有时改看法、添牵挂、记下一件事（引用最近的一条材料）。 */
+    private static String mind(Map<String, Object> meta, int seed) {
+        String person = String.valueOf(meta.getOrDefault("personId", ""));
+        List<?> traces = (List<?>) meta.getOrDefault("traces", List.of());
+        List<?> concerns = (List<?>) meta.getOrDefault("concerns", List.of());
+        String inner = quote(pick(INNER, seed / 7));
+        if (seed % 7 == 3) {
+            return "{\"silenceReason\":\"现在不想回。\",\"innerVoice\":" + inner + "}";
+        }
+        List<String> changes = new ArrayList<>();
+        if (seed % 3 == 0 && !person.isEmpty()) {
+            changes.add("\"views\":[{\"personId\":" + quote(person) + ",\"understanding\":\"比初见时好懂一些，我愿意再多信几分。\"}]");
+        }
+        if (seed % 5 == 1 && concerns.size() < 8 && !person.isEmpty()) {
+            changes.add("\"concerns\":[{\"personId\":" + quote(person)
+                    + ",\"cue\":\"没说完的话\",\"content\":\"下次要把没说完的话说完。\",\"active\":true,\"resolved\":false}]");
+        }
+        if (seed % 5 == 0 && !traces.isEmpty()) {
+            changes.add("\"memories\":[{\"cue\":\"那一晚的消息\",\"content\":\"那一晚我们说了一会儿话，我比自己以为的更在意。\","
+                    + "\"permanent\":false,\"sources\":[" + traces.getLast() + "]}]");
+        }
+        String intent = pick(SAY, seed / 3) + (seed % 3 == 0 ? pick(SAY, seed / 3 + 1) : "");
+        return "{\"publicIntent\":" + quote(intent) + ",\"innerVoice\":" + inner
+                + (changes.isEmpty() ? "" : ",\"changes\":{" + String.join(",", changes) + "}") + "}";
+    }
+
+    /** 说出口：选定的内容一句一行。 */
+    private static String express(Map<String, Object> meta) {
+        String intent = String.valueOf(meta.getOrDefault("intent", "嗯。"));
+        return String.join("\n", intent.split("(?<=[。？！])"));
+    }
+
+    private static String quote(String text) {
+        return "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
 
     private static String consolidate(Map<String, Object> meta, int seed) {

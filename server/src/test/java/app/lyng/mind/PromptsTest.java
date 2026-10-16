@@ -167,8 +167,9 @@ class PromptsTest {
         snapshot("character_in_scene_inner", Prompts.characterInScene(p, Perceive.scene(A2_LINES, NAMES, LU)));
     }
 
+    /** 私聊的记录（整理与幕后用）：隔了半小时插一行时间，别人的心声看不到。私聊里开口的两步见 MindPromptsTest。 */
     @Test
-    void aCharacterInAPrivateChat() throws IOException {
+    void aPrivateChatTranscript() {
         Instant t = Instant.parse("2026-10-15T13:05:00Z");
         List<Message> messages = List.of(
                 new Message(1, XF, "say", "睡了吗？", true, "user", false, null, t),
@@ -178,10 +179,6 @@ class PromptsTest {
         String transcript = Perceive.chat(messages, NAMES, LU);
         assertThat(transcript).contains("——10月15日 晚上9:05——", "——10月16日 凌晨0:05——", "陆雪琪（心声）：这么晚了。");
         assertThat(Perceive.chat(messages, NAMES, XF)).doesNotContain("这么晚了");
-        for (Prompts.Opportunity o : Prompts.Opportunity.values()) {
-            snapshot("character_in_chat_" + o.name().toLowerCase(), Prompts.characterInChat(luAsBorn(), "张小凡", transcript, o,
-                    "10月16日 凌晨0:06"));
-        }
     }
 
     @Test

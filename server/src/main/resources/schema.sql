@@ -50,11 +50,13 @@ CREATE TABLE IF NOT EXISTS views (
 );
 CREATE INDEX IF NOT EXISTS views_pair ON views (character_id, other_id, id DESC);
 
+-- 牵挂：cue 是人物自己写的一句线索（诞生与整理写下的没有）；text 是完整的当前内容。
 CREATE TABLE IF NOT EXISTS concerns (
     id            UUID PRIMARY KEY,
     user_id       TEXT NOT NULL,
     character_id  UUID NOT NULL REFERENCES characters (id),
     about_id      UUID REFERENCES characters (id),
+    cue           TEXT,
     text          TEXT NOT NULL,
     status        TEXT NOT NULL CHECK (status IN ('active', 'background', 'resolved')),
     resolution    TEXT,
@@ -63,12 +65,20 @@ CREATE TABLE IF NOT EXISTS concerns (
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- 记忆：content 是发生了什么与当时的意义（整理写下的把意义另放在 meaning）；cue 是人物自己写的线索。
+-- sources 是这条记忆依据的亲历痕迹。
 CREATE TABLE IF NOT EXISTS memories (
     id            UUID PRIMARY KEY,
     user_id       TEXT NOT NULL,
     character_id  UUID NOT NULL REFERENCES characters (id),
-    event         TEXT NOT NULL,
-    meaning       TEXT NOT NULL,
+    cue           TEXT,
+    content       TEXT NOT NULL,
+    meaning       TEXT,
+    permanent     BOOLEAN NOT NULL DEFAULT false,
+    about_id      UUID REFERENCES characters (id),
+    -- 依据的亲历痕迹；trace_id 是这条记忆自己在亲历档案里的那一行（人物翻找时与原话一起出现）
+    sources       BIGINT[] NOT NULL DEFAULT '{}',
+    trace_id      BIGINT,
     people        UUID[] NOT NULL DEFAULT '{}',
     source_kind   TEXT NOT NULL CHECK (source_kind IN ('scene', 'chat', 'birth')),
     source_id     UUID,
@@ -147,21 +157,36 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE INDEX IF NOT EXISTS messages_conversation ON messages (conversation_id, id);
 
--- 每个人物自己的亲历痕迹：按可见性从 lines / messages 复制，写成感知材料的一行。
+-- 每个人物自己的亲历档案：按可见性从 lines / messages 复制，写成感知材料的一行；人物形成的记忆也存一行。
 CREATE TABLE IF NOT EXISTS traces (
     id            BIGSERIAL PRIMARY KEY,
     user_id       TEXT NOT NULL,
     character_id  UUID NOT NULL REFERENCES characters (id),
-    source_kind   TEXT NOT NULL CHECK (source_kind IN ('scene', 'chat')),
+    -- memory 是人物自己形成的记忆（source_id 是记忆的 id，ref_id 为 0）
+    source_kind   TEXT NOT NULL CHECK (source_kind IN ('scene', 'chat', 'memory')),
     source_id     UUID NOT NULL,
     source_label  TEXT NOT NULL,
     ref_id        BIGINT NOT NULL,
     text          TEXT NOT NULL,
     embedding     vector,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (character_id, source_kind, ref_id)
+    UNIQUE (character_id, source_kind, source_id, ref_id)
 );
 CREATE INDEX IF NOT EXISTS traces_character ON traces (character_id, id);
+
+-- 人物自己提出的两条亲历之间的关系：较晚的是后续进展，correction 表示较晚的说法纠正或否认了较早的。
+-- 记忆与它依据的亲历也记成一条（较早的是依据）。只是待判断的线索，不是事实；读取时只展开直接相连的一层。
+CREATE TABLE IF NOT EXISTS developments (
+    character_id  UUID NOT NULL REFERENCES characters (id),
+    user_id       TEXT NOT NULL,
+    earlier_id    BIGINT NOT NULL REFERENCES traces (id),
+    later_id      BIGINT NOT NULL REFERENCES traces (id),
+    correction    BOOLEAN NOT NULL DEFAULT false,
+    run_id        UUID,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (character_id, earlier_id, later_id),
+    CHECK (earlier_id <> later_id)
+);
 
 -- 待整理的内心：一个人物 + 一个来源（某场戏 / 某段私聊到某条）。
 CREATE TABLE IF NOT EXISTS consolidations (

@@ -93,6 +93,16 @@ public class Scenes {
                 .param(sceneId).query(UUID.class).list();
     }
 
+    /** 和这个人物同场过的人。 */
+    public List<UUID> castmates(UUID characterId) {
+        return jdbc.sql("""
+                SELECT b.character_id FROM scene_cast a JOIN scene_cast b ON b.scene_id = a.scene_id
+                JOIN scenes s ON s.id = a.scene_id
+                WHERE a.character_id = ? AND b.character_id <> ? AND s.user_id = ?
+                GROUP BY b.character_id ORDER BY min(s.created_at)""")
+                .params(characterId, characterId, USER).query(UUID.class).list();
+    }
+
     public List<Line> lines(UUID sceneId) {
         return jdbc.sql("SELECT id, round, kind, speaker_id, text, by_user, run_id, created_at FROM lines WHERE scene_id = ? AND user_id = ? ORDER BY id")
                 .params(sceneId, USER).query(Line.class).list();

@@ -9,6 +9,8 @@ export const purposeLabel: Record<string, string> = {
   NARRATOR: '叙事者',
   CLOSING: '叙事者收尾',
   CHARACTER: '开口',
+  MIND: '心里过一遍',
+  EXPRESS: '说出口',
   CONSENT: '同意检查',
   CONSOLIDATE: '整理内心',
   ASK: '构思追问',

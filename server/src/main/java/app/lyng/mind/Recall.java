@@ -70,7 +70,7 @@ public class Recall {
     }
 
     public static Recalled recalled(Memory m) {
-        return new Recalled(m.sourceLabel(), m.event() + "——" + m.meaning());
+        return new Recalled(m.sourceLabel(), m.text());
     }
 
     /**

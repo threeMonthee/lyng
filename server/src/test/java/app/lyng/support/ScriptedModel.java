@@ -36,6 +36,19 @@ public class ScriptedModel implements ChatModel {
         return this;
     }
 
+    /** 回答按请求现写（例如要引用请求里给出的 id）。 */
+    public ScriptedModel replyWith(Purpose purpose, Function<ModelRequest, String> text) {
+        add(purpose, r -> completion(text.apply(r), "stop", 0.001));
+        return this;
+    }
+
+    /** 工具调用的参数按请求现写。 */
+    public ScriptedModel toolCallWith(Purpose purpose, String name, Function<ModelRequest, String> arguments) {
+        add(purpose, r -> new Completion("", null, List.of(new ToolCall("call-" + requests.size(), name,
+                arguments.apply(r))), "tool_calls", 0.001, "scripted", 10, 5, 0, 1, 2));
+        return this;
+    }
+
     /** 只回答满足条件的请求（例如后台并行整理时按人物名字分派）。 */
     public ScriptedModel replyWhen(Purpose purpose, Predicate<ModelRequest> when, String text) {
         add(purpose, when, r -> completion(text, "stop", 0.001));

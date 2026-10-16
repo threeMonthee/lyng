@@ -123,6 +123,8 @@ export interface ConcernItem {
   id: Id
   aboutId: Id | null
   aboutName: string | null
+  /** 人物自己写的一句线索；诞生时或整理时写下的没有。 */
+  cue: string | null
   text: string
   status: 'active' | 'background' | 'resolved'
   resolution: string | null
@@ -150,8 +152,13 @@ export interface CharacterPage {
 
 export interface MemoryItem {
   id: Id
-  event: string
-  meaning: string
+  /** 人物自己写的一句线索；整理时写下的没有。 */
+  cue: string | null
+  content: string
+  /** 整理时另写的“这件事意味着什么”。 */
+  meaning: string | null
+  permanent: boolean
+  about: Person | null
   people: Person[]
   sourceKind: 'scene' | 'chat' | 'birth'
   sourceId: Id | null

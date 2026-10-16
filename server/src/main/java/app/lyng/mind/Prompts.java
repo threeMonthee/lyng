@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * 所有发给模型的消息。叙事者的写法与一场戏里人物的输出格式沿用盲测验证过的版本（2026-10-09 Prompt v2）；
- * 人物的 system（2026-10-16 为“像真人”重写过一段）、内心各层、召回、私聊、整理、一念生是 2.0 新写的。
+ * 所有发给模型的消息（私聊里人物开口的两步在 MindPrompts）。叙事者的写法与一场戏里人物的输出格式沿用盲测验证过的版本
+ * （2026-10-09 Prompt v2）；人物的 system（2026-10-16 为“像真人”重写过一段）、内心各层、召回、整理、一念生是 2.0 新写的。
  * 改动这里会改变快照，受影响的行为结论不继承。
  *
  * <p>发生过的事一律写成标明说话人的感知材料，放进 user 消息，不作为对话历史回放。
@@ -45,21 +45,9 @@ public final class Prompts {
         return List.of(Msg.system(characterSystem(p)), Msg.user(user));
     }
 
-    // ---- 私聊：人物 ----
+    // ---- 私聊：人物（两步开口见 MindPrompts） ----
 
     public enum Opportunity { REPLY, CONTINUE, REACH }
-
-    public static List<Msg> characterInChat(Persona p, String other, String transcript, Opportunity opportunity,
-                                            String now) {
-        String moment = switch (opportunity) {
-            case REPLY -> fill(CHAT_REPLY, Map.of("other", other));
-            case CONTINUE -> fill(CHAT_CONTINUE, Map.of("other", other));
-            case REACH -> fill(CHAT_REACH, Map.of("other", other));
-        };
-        String user = fill(CHAT_CHARACTER_USER, Map.of(
-                "other", other, "transcript", transcript, "moment", moment, "now", now, "name", p.name()));
-        return List.of(Msg.system(characterSystem(p)), Msg.user(user));
-    }
 
     private static String characterSystem(Persona p) {
         return fill(CHARACTER_SYSTEM, Map.of(
@@ -323,29 +311,6 @@ public final class Prompts {
             {name}（心声）：此刻没说出口的一两句话。
             （行）和（说）可以有多行，按先后排列，也可以都不写；（心声）必写，只写一行，放在最后。只写（心声），就是此刻你既不说也不做。
             只写你自己，不写别人的言行；这些行以外不写任何文字。""";
-
-    private static final String CHAT_CHARACTER_USER = """
-            【你和{other}的私聊】
-            这是你和{other}之间不在眼前的文字往来：只有说出的话，看不到对方的神情。标着“{name}”的是你自己发出的话；“{name}（心声）”只有你自己知道。
-            {transcript}
-
-            【此刻】
-            现在是{now}。{moment}
-
-            【篇幅】
-            像发消息一样：一条一两句，可以连发几条，也可以只回一两个字。不写动作和神情。
-
-            【怎么写】
-            {name}（说）：你发出去的一条消息，只写话本身，不加引号。
-            {name}（心声）：此刻没说出口的一两句话。
-            （说）可以有多行，每行是一条消息，也可以不写；（心声）必写，只写一行，放在最后。只写（心声），就是这一次你不发。
-            只写你自己；这些行以外不写任何文字。""";
-
-    private static final String CHAT_REPLY = "{other}刚发来了上面最后的话。";
-
-    private static final String CHAT_CONTINUE = "{other}没有再说什么。你可以再说点什么，也可以不说。";
-
-    private static final String CHAT_REACH = "你们有一阵没说话了。你想起了{other}。你可以主动给{other}发消息，也可以不发。";
 
     private static final String NARRATOR_SYSTEM = """
             你是这个世界的叙事者。你不是故事里的人物，不和任何人物建立关系。

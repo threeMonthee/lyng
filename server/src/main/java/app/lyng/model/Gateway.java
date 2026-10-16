@@ -24,7 +24,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class Gateway {
 
     static final int ATTEMPTS = 2;
-    static final int TOOL_ROUNDS = 3;
+    static final int TOOL_ROUNDS = 4;
 
     /** 运行关联的对象，用于幕后按人物、戏、私聊、草稿查找。 */
     public record Links(UUID characterId, UUID sceneId, UUID conversationId, UUID draftId) {

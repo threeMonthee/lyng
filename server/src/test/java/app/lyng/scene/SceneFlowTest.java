@@ -218,7 +218,7 @@ class SceneFlowTest extends IntegrationTest {
         settle();
 
         Inner.Memory memory = inner.memories(lu, 10, 0).getFirst();
-        assertThat(memory.event()).contains("骨铃");
+        assertThat(memory.content()).contains("骨铃");
         assertThat(memory.people()).containsExactly(xf);
         assertThat(memory.sourceLabel()).isEqualTo("第1场");
         assertThat(inner.view(lu, xf).orElseThrow().text()).isEqualTo("他还是从前那个人。我信他。");

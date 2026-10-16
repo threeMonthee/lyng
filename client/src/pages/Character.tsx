@@ -258,6 +258,7 @@ function Concerns({ items }: { items: ConcernItem[] }) {
                       关于{x.aboutName}
                     </span>
                   ) : null}
+                  {x.cue ? <p className={cn('mb-1 text-[14px] font-medium', g !== 'active' && 'text-muted')}>{x.cue}</p> : null}
                   <p className={cn('prose-life text-[15px]', g !== 'active' && 'text-muted')}>{x.text}</p>
                   {x.resolution ? <p className="mt-1.5 text-[13px] text-muted">了结：{x.resolution}</p> : null}
                   <div className="mt-2 flex gap-3 text-[12px] text-faint">
@@ -290,13 +291,19 @@ function MemoriesTab({ id }: { id: string }) {
   if (memories.isError) return <ErrorState message={errorMessage(memories.error)} onRetry={() => memories.refetch()} />
   const items = memories.data.pages.flatMap((p) => p.items)
   if (items.length === 0) {
-    return <Empty title="还没有记住什么">一场戏结束、一段私聊告一段落后，TA 会自己决定记住哪些事、那些事意味着什么。</Empty>
+    return <Empty title="还没有记住什么">私聊时 TA 会当场决定记住哪些事；一场戏结束后，TA 也会回头想一想。</Empty>
   }
   return (
     <div className="space-y-3">
       {items.map((m) => (
         <Card key={m.id} className="p-4">
-          <p className="prose-life text-[15px]">{m.event}</p>
+          {m.cue || m.permanent ? (
+            <div className="mb-1 flex items-baseline gap-2">
+              {m.cue ? <p className="text-[14px] font-medium">{m.cue}</p> : null}
+              {m.permanent ? <span className="shrink-0 text-[12px] text-accent">一直记得</span> : null}
+            </div>
+          ) : null}
+          <p className="prose-life text-[15px]">{m.content}</p>
           {m.meaning ? <p className="prose-life mt-2 border-l-2 border-border pl-3 text-[14px] leading-[1.8] text-muted">{m.meaning}</p> : null}
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-faint">
             {m.people.length > 0 ? (

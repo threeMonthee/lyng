@@ -57,6 +57,12 @@ public class Chats {
                 .params(id, USER).query(Chats::conversation).optional();
     }
 
+    /** 两个人物之间已有的私聊（不新建）。 */
+    public Optional<Conversation> between(UUID x, UUID y) {
+        return jdbc.sql("SELECT " + COLUMNS + " FROM conversations WHERE user_id = ? AND ((a_id = ? AND b_id = ?) OR (a_id = ? AND b_id = ?))")
+                .params(USER, x, y, y, x).query(Chats::conversation).optional();
+    }
+
     public Conversation require(UUID id) {
         return conversation(id).orElseThrow(() -> new NotFound("没有这段私聊"));
     }

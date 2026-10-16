@@ -64,7 +64,7 @@ public abstract class IntegrationTest {
         settle();
         jdbc.sql("""
                 TRUNCATE settings, worlds, characters, selves, views, concerns, memories, scenes, scene_cast, lines,
-                    conversations, messages, traces, consolidations, runs, model_calls, drafts CASCADE""").update();
+                    conversations, messages, traces, developments, consolidations, runs, model_calls, drafts CASCADE""").update();
         model.reset();
         var born = creation.bear(null, Markup.parseDraft(Fixtures.draft(), true, List.of()));
         world = born.worldId();

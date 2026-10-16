@@ -97,8 +97,8 @@ class GatewayTest extends IntegrationTest {
     }
 
     @Test
-    void afterThreeToolRoundsTheModelMustAnswer() {
-        for (int i = 0; i < 3; i++) {
+    void afterFourToolRoundsTheModelMustAnswer() {
+        for (int i = 0; i < 4; i++) {
             model.toolCall(Purpose.CHARACTER, "recall", "{\"query\":\"再翻\"}");
         }
         model.reply(Purpose.CHARACTER, "陆雪琪（心声）：够了。");
@@ -106,9 +106,9 @@ class GatewayTest extends IntegrationTest {
                 List.of(new Tool("recall", "翻经历", Map.of())), call -> "没有翻到相关的经历。", Map.of());
         gateway.run(spec, text -> Markup.parseTurn(text, "陆雪琪", true));
         List<ModelRequest> requests = model.requests(Purpose.CHARACTER);
-        assertThat(requests).hasSize(4);
-        assertThat(requests.subList(0, 3)).allSatisfy(r -> assertThat(r.tools()).hasSize(1));
-        assertThat(requests.get(3).tools()).isEmpty();
+        assertThat(requests).hasSize(5);
+        assertThat(requests.subList(0, 4)).allSatisfy(r -> assertThat(r.tools()).hasSize(1));
+        assertThat(requests.get(4).tools()).isEmpty();
     }
 
     @Test

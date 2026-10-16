@@ -39,16 +39,17 @@ public class WorldController {
 
     public record ViewItem(UUID otherId, String otherName, String text, UUID runId, Instant createdAt, int versions) {}
 
-    public record ConcernItem(UUID id, UUID aboutId, String aboutName, String text, String status, String resolution,
-                              UUID runId, Instant createdAt, Instant updatedAt) {}
+    public record ConcernItem(UUID id, UUID aboutId, String aboutName, String cue, String text, String status,
+                              String resolution, UUID runId, Instant createdAt, Instant updatedAt) {}
 
     public record CharacterPage(UUID id, UUID worldId, String worldName, String name, String profile, Inner.Self self,
                                 int selfVersions, List<ViewItem> views, List<ConcernItem> concerns, int memories,
                                 SceneSummary openScene, List<ChatSummary> chats, List<Person> others,
                                 Instant createdAt) {}
 
-    public record MemoryItem(UUID id, String event, String meaning, List<Person> people, String sourceKind,
-                             UUID sourceId, String sourceLabel, UUID runId, Instant createdAt) {}
+    public record MemoryItem(UUID id, String cue, String content, String meaning, boolean permanent, Person about,
+                             List<Person> people, String sourceKind, UUID sourceId, String sourceLabel, UUID runId,
+                             Instant createdAt) {}
 
     public record Memories(List<MemoryItem> items, int total) {}
 
@@ -116,7 +117,7 @@ public class WorldController {
                 shapes.person(all, v.otherId()).name(), v.text(), v.runId(), v.createdAt(),
                 inner.viewHistory(id, v.otherId()).size())).toList();
         List<ConcernItem> concerns = inner.concerns(id).stream().map(c -> new ConcernItem(c.id(), c.aboutId(),
-                c.aboutId() == null ? null : shapes.person(all, c.aboutId()).name(), c.text(), c.status(),
+                c.aboutId() == null ? null : shapes.person(all, c.aboutId()).name(), c.cue(), c.text(), c.status(),
                 c.resolution(), c.runId(), c.createdAt(), c.updatedAt())).toList();
         SceneSummary open = scenes.openWith(id).stream().findFirst().map(s -> shapes.scene(s, all, worldNames)).orElse(null);
         List<ChatSummary> mine = chats.with(id).stream().filter(c -> chats.lastId(c.id()) > 0)
@@ -146,8 +147,8 @@ public class WorldController {
         worlds.requireCharacter(id);
         Map<UUID, Character> all = shapes.everyone();
         List<MemoryItem> items = inner.memories(id, Math.min(limit, 100), Math.max(offset, 0)).stream()
-                .map(m -> new MemoryItem(m.id(), m.event(), m.meaning(),
-                        m.people().stream().map(p -> shapes.person(all, p)).toList(), m.sourceKind(), m.sourceId(),
+                .map(m -> new MemoryItem(m.id(), m.cue(), m.content(), m.meaning(), m.permanent(),
+                        m.aboutId() == null ? null : shapes.person(all, m.aboutId()), m.people().stream().map(p -> shapes.person(all, p)).toList(), m.sourceKind(), m.sourceId(),
                         m.sourceLabel(), m.runId(), m.createdAt()))
                 .toList();
         return new Memories(items, inner.memoryCount(id));

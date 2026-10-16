@@ -30,6 +30,15 @@ public class Consolidations {
                 .params(UUID.randomUUID(), USER, characterId, sourceKind, sourceId, fromRef, toRef).update();
     }
 
+    /** 这段话人物开口时已经当场承接进内心（私聊里由 AI 驱动的一方），不用再整理。 */
+    public void taken(UUID characterId, String sourceKind, UUID sourceId, long fromRef, long toRef, UUID runId) {
+        jdbc.sql("""
+                INSERT INTO consolidations (id, user_id, character_id, source_kind, source_id, from_ref, to_ref, status,
+                    run_id, done_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'done', ?, now())""")
+                .params(UUID.randomUUID(), USER, characterId, sourceKind, sourceId, fromRef, toRef, runId).update();
+    }
+
     static final int TRIES = 3;
 
     /** 还没整理好的（待做，或失败不到三次的），先来的在前。 */

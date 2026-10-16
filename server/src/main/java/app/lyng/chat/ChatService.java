@@ -2,16 +2,11 @@ package app.lyng.chat;
 
 import app.lyng.mind.Consolidator;
 import app.lyng.mind.Events;
-import app.lyng.mind.Markup.Beat;
-import app.lyng.mind.Markup.Turn;
-import app.lyng.mind.Perceive;
-import app.lyng.mind.Prompts;
+import app.lyng.mind.Mind;
 import app.lyng.mind.Prompts.Opportunity;
 import app.lyng.mind.Voice;
 import app.lyng.mind.Witness;
 import app.lyng.model.CallFailure;
-import app.lyng.model.Gateway;
-import app.lyng.model.Gateway.Links;
 import app.lyng.store.Chats;
 import app.lyng.store.Chats.Conversation;
 import app.lyng.store.Chats.Message;
@@ -38,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * 私聊：两个人物之间不在眼前的文字往来。你附身其中一方，另一方由 AI 驱动。
+ * 私聊：两个人物之间不在眼前的文字往来。你附身其中一方，另一方由 AI 驱动，每次开口都先在心里过一遍（Mind）。
  * 你发一句，对方得到一次回应的机会；“继续”再给一次机会；你回来时，心里有关于你的牵挂的人物可能主动开口。
  *
  * <p>待做的一步记成“人物id|机会”（reply / continue / reach），失败就停在这一步，重试接着做。
@@ -48,8 +43,6 @@ public class ChatService {
 
     private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
-    /** 开口时带上的最近几行（每条消息、每句心声各占一行），约二十来个来回。 */
-    static final int TRANSCRIPT = 120;
     static final int CONSOLIDATE_EVERY = 24;
     static final Duration QUIET = Duration.ofMinutes(30);
     static final int REACH_LIMIT = 3;
@@ -59,23 +52,23 @@ public class ChatService {
     private final Scenes scenes;
     private final Inner inner;
     private final Settings settings;
-    private final Gateway gateway;
     private final Voice voice;
+    private final Mind mind;
     private final Witness witness;
     private final Consolidator consolidator;
     private final Consolidations consolidations;
     private final Map<UUID, ReentrantLock> locks = new ConcurrentHashMap<>();
     private final AtomicInteger reaching = new AtomicInteger();
 
-    public ChatService(Chats chats, Worlds worlds, Scenes scenes, Inner inner, Settings settings, Gateway gateway,
-                       Voice voice, Witness witness, Consolidator consolidator, Consolidations consolidations) {
+    public ChatService(Chats chats, Worlds worlds, Scenes scenes, Inner inner, Settings settings, Voice voice,
+                       Mind mind, Witness witness, Consolidator consolidator, Consolidations consolidations) {
         this.chats = chats;
         this.worlds = worlds;
         this.scenes = scenes;
         this.inner = inner;
         this.settings = settings;
-        this.gateway = gateway;
         this.voice = voice;
+        this.mind = mind;
         this.witness = witness;
         this.consolidator = consolidator;
         this.consolidations = consolidations;
@@ -105,6 +98,10 @@ public class ChatService {
             }
             if (!c.pending().isEmpty()) {
                 throw new Conflict("对方还没回完，稍等或先重试");
+            }
+            if (!playedId.equals(c.playedId())) {
+                // 换手之前，你替原来那一方说过的话先由 TA 自己整理进内心
+                consolidate(c, 1);
             }
             chats.setPlayed(conversationId, playedId);
         });
@@ -244,61 +241,29 @@ public class ChatService {
     }
 
     private void speak(Conversation c, UUID speakerId, Opportunity opportunity, Events events, boolean unread) {
-        Character me = worlds.requireCharacter(speakerId);
-        UUID otherId = c.other(speakerId);
-        Character other = worlds.requireCharacter(otherId);
-        var world = worlds.requireWorld(me.worldId());
-        Map<UUID, String> names = voice.names(me.worldId());
         events.emit("status", Map.of("step", "character", "speakerId", speakerId));
-        List<Message> recent = chats.messages(c.id(), Long.MAX_VALUE, TRANSCRIPT);
-        long fromRef = recent.isEmpty() ? Long.MAX_VALUE : recent.getFirst().id();
-        String situation = recent.stream().skip(Math.max(0, recent.size() - 6))
-                .map(m -> Perceive.message(m, names, speakerId)).filter(s -> s != null)
-                .reduce((a, b) -> a + "\n" + b).orElse(other.name());
-        Voice.Here here = new Voice.Here("chat", c.id(), fromRef);
-        var persona = voice.persona(me, world, List.of(other), situation, here, settings.get().scale());
-        var messages = Prompts.characterInChat(persona, other.name(), Perceive.chat(recent, names, speakerId),
-                opportunity, Perceive.when(Instant.now()));
-        String title = me.name() + " · 和" + other.name() + "的私聊（" + switch (opportunity) {
-            case REPLY -> "回应";
-            case CONTINUE -> "继续";
-            case REACH -> "主动";
-        } + "）";
-        var result = voice.speak(me, messages, false, new Links(speakerId, null, c.id(), null), title, here,
-                new Voice.Sink() {
-                    @Override
-                    public void beat(Beat beat) {
-                        Map<String, Object> data = new LinkedHashMap<>();
-                        data.put("speakerId", speakerId);
-                        data.put("kind", "say");
-                        data.put("text", beat.text());
-                        events.emit("draft", data);
-                    }
-
-                    @Override
-                    public void discard() {
-                        events.emit("discard", Map.of());
-                    }
-                });
-        Turn turn = result.value();
-        String kind = opportunity.name().toLowerCase();
-        List<Long> ids = new ArrayList<>();
-        for (Beat b : turn.beats()) {
-            for (String line : b.text().split("\\R+")) {
-                if (!line.isBlank()) {
-                    ids.add(witness.message(c, names, speakerId, "say", line.strip(), false, kind, unread, result.runId()));
-                }
+        List<Long> ids = mind.speak(c, speakerId, opportunity, unread, new Mind.Sink() {
+            @Override
+            public void line(String text) {
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("speakerId", speakerId);
+                data.put("kind", "say");
+                data.put("text", text);
+                events.emit("draft", data);
             }
-        }
-        ids.add(witness.message(c, names, speakerId, "inner", turn.inner(), false, kind, false, result.runId()));
-        Map<String, Object> outcome = new LinkedHashMap<>();
-        outcome.put("发出的话", turn.beats().stream().map(Beat::text).toList());
-        outcome.put("心声", turn.inner());
-        gateway.outcome(result.runId(), outcome);
+
+            @Override
+            public void discard() {
+                events.emit("discard", Map.of());
+            }
+        });
         events.emit("saved", Map.of("messages", messages(c.id(), ids)));
     }
 
-    /** 双方各自把还没排进整理的话（至少 minimum 句说出口的话）排进整理。 */
+    /**
+     * 你附身过的一方把还没排进整理的话（至少 minimum 句说出口的话）排进整理。由 AI 驱动的一方每次开口时
+     * 已经当场承接进内心，不再整理；只有其间有你替 TA 说的话，才需要 TA 回头整理一遍。
+     */
     private void consolidate(Conversation c, int minimum) {
         long last = chats.lastId(c.id());
         for (UUID who : List.of(c.aId(), c.bId())) {
@@ -306,8 +271,10 @@ public class ChatService {
             if (last <= covered) {
                 continue;
             }
-            long said = chats.messagesBetween(c.id(), covered + 1, last).stream().filter(m -> m.kind().equals("say")).count();
-            if (said >= minimum) {
+            List<Message> range = chats.messagesBetween(c.id(), covered + 1, last);
+            boolean played = range.stream().anyMatch(m -> m.byUser() && m.speakerId().equals(who));
+            long said = range.stream().filter(m -> m.kind().equals("say")).count();
+            if (played && said >= minimum) {
                 consolidator.enqueue(who, "chat", c.id(), covered + 1, last);
             }
         }

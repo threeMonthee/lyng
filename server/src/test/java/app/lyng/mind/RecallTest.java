@@ -34,12 +34,12 @@ class RecallTest extends IntegrationTest {
     void aSimilarMemoryComesBackEvenWhenItIsNotRecent() {
         memories();
         List<Inner.Memory> recent = recall.recentMemories(lu);
-        assertThat(recent).hasSize(3).noneMatch(m -> m.event().contains("骨铃"));
+        assertThat(recent).hasSize(3).noneMatch(m -> m.content().contains("骨铃"));
         List<Recalled> found = recall.around(lu, "张小凡（行）：把骨铃放在石桌上。", recent.stream().map(Inner.Memory::id).toList(),
                 now, 0);
         assertThat(found.getFirst().source()).isEqualTo("第1场");
         assertThat(found.getFirst().text()).isEqualTo("他把骨铃放在石桌上，说不是他。——我错怪了他。");
-        assertThat(found).noneMatch(r -> recent.stream().anyMatch(m -> r.text().startsWith(m.event())));
+        assertThat(found).noneMatch(r -> recent.stream().anyMatch(m -> r.text().startsWith(m.content())));
     }
 
     @Test
