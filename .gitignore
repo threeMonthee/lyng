@@ -1,1 +1,18 @@
 /.idea/
+.vscode/
+.DS_Store
+
+# 凭据只放在本地
+.env
+runtime.env
+
+# 构建产物
+server/target/
+client/node_modules/
+client/dist/
+client/test-results/
+client/playwright-report/
+
+# 本地数据与日志
+data/
+*.log
