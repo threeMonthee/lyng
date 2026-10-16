@@ -35,12 +35,12 @@ export function RunList({ filter }: { filter: Record<string, string> }) {
   }
   return (
     <>
-      <Card className="divide-y divide-border overflow-hidden">
+      <Card className="list overflow-hidden" style={{ '--inset': '44px' } as React.CSSProperties}>
         {items.map((r) => (
-          <Link key={r.id} to={`/runs/${r.id}`} className="flex items-center gap-3 px-4 py-3 transition hover:bg-surface-2/60">
+          <Link key={r.id} to={`/runs/${r.id}`} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-surface-2/50">
             <RunStatus status={r.status} />
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[14px]">{r.title}</div>
+              <div className="truncate text-[15px]">{r.title}</div>
               <div className="mt-0.5 truncate text-[12px] text-muted">
                 {r.purposeLabel}
                 {r.attempts > 1 ? ` · 第 ${r.attempts} 次才成` : ''}

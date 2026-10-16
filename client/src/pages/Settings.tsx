@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, ScrollText } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { api } from '@/lib/api'
 import { errorMessage, useHome, useSettings, useUsage } from '@/lib/query'
 import { useTheme, type Theme } from '@/lib/hooks'
@@ -90,16 +91,19 @@ export function SettingsPage() {
             <Section title="费用">
               <Card className="p-4">
                 {usage.data ? <Spend spent={usage.data.spent} budget={usage.data.budget} /> : null}
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="text-[14px] text-muted">上限 $</span>
-                  <Input
-                    inputMode="decimal"
-                    className="w-32"
-                    placeholder="不设上限"
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                  />
-                  <Button variant="outline" loading={saving} onClick={saveBudget}>
+                <div className="mt-5 flex items-center gap-2">
+                  <span className="text-[14px] text-muted">上限</span>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-faint">$</span>
+                    <Input
+                      inputMode="decimal"
+                      className="w-36 pl-7 tabular-nums"
+                      placeholder="不设上限"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                    />
+                  </div>
+                  <Button variant="secondary" loading={saving} onClick={saveBudget}>
                     保存
                   </Button>
                 </div>
@@ -128,7 +132,7 @@ export function SettingsPage() {
                   ) : (
                     <table className="w-full text-[13px]">
                       <thead className="text-left text-[12px] text-faint">
-                        <tr className="border-b border-border">
+                        <tr className="border-b border-border/70">
                           <th className="px-4 py-2 font-normal">用途</th>
                           <th className="px-2 py-2 text-right font-normal">次数</th>
                           <th className="px-2 py-2 text-right font-normal">失败</th>
@@ -138,12 +142,12 @@ export function SettingsPage() {
                       </thead>
                       <tbody>
                         {usage.data.purposes.map((p) => (
-                          <tr key={p.purpose} className="border-b border-border last:border-0">
-                            <td className="px-4 py-2">{purposeLabel[p.purpose] ?? p.purpose}</td>
-                            <td className="px-2 py-2 text-right tabular-nums">{p.calls}</td>
-                            <td className="px-2 py-2 text-right tabular-nums">{p.failures || '—'}</td>
-                            <td className="hidden px-2 py-2 text-right tabular-nums sm:table-cell">{ms(p.medianMs)}</td>
-                            <td className="px-4 py-2 text-right tabular-nums">{usd(p.cost)}</td>
+                          <tr key={p.purpose} className="border-b border-border/70 last:border-0">
+                            <td className="px-4 py-2.5">{purposeLabel[p.purpose] ?? p.purpose}</td>
+                            <td className="px-2 py-2.5 text-right tabular-nums">{p.calls}</td>
+                            <td className={cn('px-2 py-2.5 text-right tabular-nums', p.failures ? 'text-danger' : 'text-faint')}>{p.failures || '—'}</td>
+                            <td className="hidden px-2 py-2.5 text-right tabular-nums text-muted sm:table-cell">{ms(p.medianMs)}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums">{usd(p.cost)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -170,9 +174,15 @@ export function SettingsPage() {
 
             <Section title="更多" className="mt-8">
               <Card className="overflow-hidden">
-                <Link to="/runs" className="flex items-center px-4 py-3 text-[14px] hover:bg-surface-2/60">
-                  <span className="flex-1">幕后：全部运行记录</span>
-                  <ChevronRight className="h-4 w-4 text-faint" />
+                <Link to="/runs" className="group flex items-center gap-3 px-4 py-3.5 text-[15px] transition-colors hover:bg-surface-2/50">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-surface-2 text-muted">
+                    <ScrollText className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1">
+                    幕后
+                    <span className="ml-2 text-[12px] text-faint">全部运行记录</span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 text-faint transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </Card>
               <p className="mt-4 text-[12px] leading-relaxed text-faint">
@@ -192,12 +202,12 @@ function Spend({ spent, budget }: { spent: number; budget: number | null }) {
   return (
     <div>
       <div className="flex items-baseline gap-2">
-        <span className="text-[24px] font-semibold tabular-nums">{usd(spent)}</span>
+        <span className="text-[28px] font-semibold leading-none tracking-tight tabular-nums">{usd(spent)}</span>
         <span className="text-[13px] text-muted">{budget !== null ? `/ 上限 ${usd(budget)}` : '已花费，未设上限'}</span>
       </div>
       {budget !== null ? (
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-          <div className={ratio >= 0.9 ? 'h-full bg-danger' : 'h-full bg-accent'} style={{ width: `${ratio * 100}%` }} />
+        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-2">
+          <div className={cn('h-full rounded-full transition-[width] duration-500', ratio >= 0.9 ? 'bg-danger' : 'bg-accent')} style={{ width: `${ratio * 100}%` }} />
         </div>
       ) : null}
     </div>
@@ -207,12 +217,15 @@ function Spend({ spent, budget }: { spent: number; budget: number | null }) {
 function Days({ days }: { days: { day: string; cost: number; calls: number }[] }) {
   const max = Math.max(...days.map((d) => d.calls), 1)
   return (
-    <div className="border-t border-border p-4">
-      <div className="mb-2 text-[12px] text-faint">最近两周每天的调用次数</div>
+    <div className="border-t border-border/70 p-4">
+      <div className="mb-3 text-[12px] text-faint">最近两周每天的调用次数</div>
       <div className="flex h-20 items-end gap-1">
         {days.map((d) => (
-          <div key={d.day} className="flex flex-1 flex-col items-center justify-end" title={`${d.day}：${d.calls} 次，${usd(d.cost)}`}>
-            <div className="w-full rounded-sm bg-accent/70" style={{ height: `${Math.max(4, (d.calls / max) * 100)}%` }} />
+          <div key={d.day} className="group flex h-full flex-1 flex-col items-center justify-end" title={`${d.day}：${d.calls} 次，${usd(d.cost)}`}>
+            <div
+              className="w-full max-w-6 rounded-[4px] bg-accent/60 transition-colors group-hover:bg-accent"
+              style={{ height: `${Math.max(4, (d.calls / max) * 100)}%` }}
+            />
           </div>
         ))}
       </div>

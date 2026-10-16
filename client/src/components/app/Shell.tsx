@@ -27,16 +27,18 @@ export function Shell() {
   const immersive = isImmersive(pathname)
   return (
     <div className="flex h-dvh overflow-hidden">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-surface/60 md:flex">
-        <div className="px-5 pb-4 pt-6">
-          <NavLink to="/" className="font-serif text-[22px] font-semibold tracking-wide">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/80 bg-surface/50 md:flex">
+        <div className="flex items-center gap-2 px-6 pb-5 pt-7">
+          <NavLink to="/" className="font-serif text-[21px] font-semibold leading-none tracking-[0.08em]">
             此间有灵
           </NavLink>
           {home.data?.fake ? (
-            <div className="mt-1.5 inline-block rounded-md bg-warn-soft px-1.5 py-0.5 text-[11px] text-warn">替身模式</div>
+            <span className="rounded-full bg-warn-soft px-2 py-0.5 text-[10.5px] font-medium leading-4 text-warn" title="人物的话由程序拼出，不调用模型">
+              替身
+            </span>
           ) : null}
         </div>
-        <nav className="space-y-0.5 px-3">
+        <nav className="space-y-px px-3">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -44,8 +46,8 @@ export function Shell() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2 text-[14px] transition',
-                  isActive ? 'bg-surface-2 font-medium text-text' : 'text-muted hover:bg-surface-2/70 hover:text-text',
+                  'flex h-9 items-center gap-3 rounded-[10px] px-3 text-[14px] transition-colors',
+                  isActive ? 'bg-surface font-medium text-text shadow-card' : 'text-muted hover:bg-surface-2/70 hover:text-text',
                 )
               }
             >
@@ -56,24 +58,26 @@ export function Shell() {
           ))}
         </nav>
         {home.data && home.data.worlds.length > 0 ? (
-          <div className="scrollbar-thin mt-6 min-h-0 flex-1 overflow-y-auto px-3 pb-6">
-            <div className="px-3 pb-1.5 text-[12px] text-faint">世界</div>
-            {home.data.worlds.map((w) => (
-              <NavLink
-                key={w.id}
-                to={`/worlds/${w.id}`}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-2.5 rounded-xl px-3 py-1.5 text-[14px] transition',
-                    isActive ? 'bg-surface-2 text-text' : 'text-muted hover:bg-surface-2/70 hover:text-text',
-                  )
-                }
-              >
-                <Avatar name={w.name} size={22} />
-                <span className="truncate">{w.name}</span>
-                {w.busy ? <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-accent" title="有进行中的戏" /> : null}
-              </NavLink>
-            ))}
+          <div className="scrollbar-thin mt-7 min-h-0 flex-1 overflow-y-auto px-3 pb-6">
+            <div className="px-3 pb-2 text-[12px] font-medium text-faint">世界</div>
+            <div className="space-y-px">
+              {home.data.worlds.map((w) => (
+                <NavLink
+                  key={w.id}
+                  to={`/worlds/${w.id}`}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex h-9 items-center gap-2.5 rounded-[10px] px-3 text-[14px] transition-colors',
+                      isActive ? 'bg-surface text-text shadow-card' : 'text-muted hover:bg-surface-2/70 hover:text-text',
+                    )
+                  }
+                >
+                  <Avatar name={w.name} size={20} square />
+                  <span className="min-w-0 flex-1 truncate">{w.name}</span>
+                  {w.busy ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent text-accent" title="有进行中的戏" /> : null}
+                </NavLink>
+              ))}
+            </div>
           </div>
         ) : null}
       </aside>
@@ -82,21 +86,24 @@ export function Shell() {
           <Outlet />
         </main>
         {immersive ? null : (
-          <nav className="pb-safe flex shrink-0 border-t border-border bg-surface/95 backdrop-blur md:hidden">
+          <nav className="pb-safe flex shrink-0 bg-surface shadow-[0_-1px_0_var(--border)] md:hidden">
             {NAV.filter((n) => !n.desktopOnly).map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) =>
-                  cn('relative flex flex-1 flex-col items-center gap-0.5 pb-1.5 pt-2 text-[11px]', isActive ? 'text-accent' : 'text-faint')
+                  cn(
+                    'relative flex flex-1 flex-col items-center gap-[3px] pb-1.5 pt-2 text-[10.5px] transition-colors',
+                    isActive ? 'font-medium text-accent [&_svg]:[stroke-width:2.1]' : 'text-faint',
+                  )
                 }
               >
-                <item.icon className="h-[22px] w-[22px]" strokeWidth={1.8} />
+                <item.icon className="h-6 w-6" />
                 {item.label}
                 {item.badge && unread > 0 ? (
-                  <span className="absolute left-1/2 top-1 ml-2">
-                    <Badge>{unread}</Badge>
+                  <span className="absolute left-1/2 top-1 ml-1.5">
+                    <Badge className="ring-2 ring-surface">{unread}</Badge>
                   </span>
                 ) : null}
               </NavLink>
@@ -112,7 +119,7 @@ export function Badge({ children, className }: { children: ReactNode; className?
   return (
     <span
       className={cn(
-        'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-1 text-[11px] font-medium leading-none text-white',
+        'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-danger px-[5px] text-[11px] font-semibold leading-none tabular-nums text-white dark:text-bg',
         className,
       )}
     >

@@ -4,9 +4,9 @@ import { useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { errorMessage, useHome } from '@/lib/query'
 import type { ChatSummary, Person } from '@/lib/types'
-import { cn } from '@/lib/cn'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import { Chip } from '@/components/ui/choice'
 import { Notice } from '@/components/ui/feedback'
 import { Label } from '@/components/ui/field'
 import { Sheet } from '@/components/ui/sheet'
@@ -63,19 +63,16 @@ export function NewChatSheet({
   const pick = (list: Person[], value: string | null, onPick: (id: string) => void, disabled?: string | null) => (
     <div className="flex flex-wrap gap-2">
       {list.map((p) => (
-        <button
+        <Chip
           key={p.id}
-          type="button"
           disabled={p.id === disabled}
+          selected={value === p.id}
           onClick={() => onPick(p.id)}
-          className={cn(
-            'inline-flex items-center gap-2 rounded-full border py-1 pl-1 pr-3 text-[14px] transition disabled:opacity-35',
-            value === p.id ? 'border-accent bg-accent-soft' : 'border-border bg-surface hover:bg-surface-2',
-          )}
+          leading={<Avatar name={p.name} size={26} />}
+          className="py-1 text-[14px]"
         >
-          <Avatar name={p.name} size={26} />
           {p.name}
-        </button>
+        </Chip>
       ))}
     </div>
   )
@@ -103,20 +100,19 @@ export function NewChatSheet({
             <Label>哪个世界</Label>
             <div className="flex flex-wrap gap-2">
               {worlds.map((w) => (
-                <button
+                <Chip
                   key={w.id}
+                  selected={world === w.id}
                   onClick={() => {
                     setWorld(w.id)
                     setPlayed(null)
                     setOther(null)
                   }}
-                  className={cn(
-                    'rounded-full border px-3.5 py-1.5 text-[14px]',
-                    world === w.id ? 'border-accent bg-accent-soft' : 'border-border hover:bg-surface-2',
-                  )}
+                  leading={<Avatar name={w.name} size={26} square />}
+                  className="py-1 text-[14px]"
                 >
                   {w.name}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>

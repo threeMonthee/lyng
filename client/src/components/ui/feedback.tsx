@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { AlertCircle, RotateCw } from 'lucide-react'
+import { AlertCircle, Info, RotateCw, TriangleAlert } from 'lucide-react'
 import { cn } from '@/lib/cn'
 
 export function Spinner({ className }: { className?: string }) {
@@ -12,16 +12,16 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-surface-2', className)} />
+  return <div className={cn('animate-pulse rounded-xl bg-surface-2', className)} />
 }
 
 /** 整页加载中：几条骨架，比转圈更安静。 */
 export function PageLoading({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="space-y-3 p-4 md:p-0" aria-busy="true" aria-label="加载中">
-      <Skeleton className="h-7 w-40" />
+    <div className="fade-enter space-y-3" aria-busy="true" aria-label="加载中">
+      <Skeleton className="h-6 w-36" />
       {Array.from({ length: rows }, (_, i) => (
-        <Skeleton key={i} className="h-16 w-full" />
+        <Skeleton key={i} className="h-[72px] w-full" />
       ))}
     </div>
   )
@@ -29,23 +29,29 @@ export function PageLoading({ rows = 4 }: { rows?: number }) {
 
 export function Empty({ icon, title, children, action }: { icon?: ReactNode; title: string; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center px-6 py-14 text-center">
-      {icon ? <div className="mb-3 text-faint">{icon}</div> : null}
+    <div className="fade-enter flex flex-col items-center px-6 py-14 text-center">
+      {icon ? (
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-surface-2 text-faint [&_svg]:h-6 [&_svg]:w-6">
+          {icon}
+        </div>
+      ) : null}
       <p className="text-[15px] font-medium text-text">{title}</p>
-      {children ? <div className="mt-1.5 max-w-sm text-sm leading-relaxed text-muted">{children}</div> : null}
-      {action ? <div className="mt-5">{action}</div> : null}
+      {children ? <div className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted">{children}</div> : null}
+      {action ? <div className="mt-6">{action}</div> : null}
     </div>
   )
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div className="flex flex-col items-center px-6 py-14 text-center">
-      <AlertCircle className="mb-3 h-6 w-6 text-danger" />
+    <div className="fade-enter flex flex-col items-center px-6 py-14 text-center">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-danger-soft text-danger">
+        <AlertCircle className="h-6 w-6" />
+      </div>
       <p className="text-[15px] font-medium">没能打开</p>
-      <p className="mt-1.5 max-w-sm text-sm text-muted">{message}</p>
+      <p className="mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted">{message}</p>
       {onRetry ? (
-        <button onClick={onRetry} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent">
+        <button onClick={onRetry} className="mt-5 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium text-accent hover:bg-accent-soft">
           <RotateCw className="h-4 w-4" />
           再试一次
         </button>
@@ -54,27 +60,33 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   )
 }
 
+const NOTICE_ICON = { info: Info, warn: TriangleAlert, danger: AlertCircle }
+
 /** 一行提示：失败、注意或普通说明。 */
 export function Notice({
   tone = 'info',
   children,
   action,
   className,
+  icon = true,
 }: {
   tone?: 'info' | 'warn' | 'danger'
   children: ReactNode
   action?: ReactNode
   className?: string
+  icon?: boolean
 }) {
   const tones = {
-    info: 'bg-surface-2 text-muted',
+    info: 'bg-surface-2/80 text-muted',
     warn: 'bg-warn-soft text-warn',
     danger: 'bg-danger-soft text-danger',
   }
+  const Icon = NOTICE_ICON[tone]
   return (
-    <div className={cn('flex items-start gap-3 rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed', tones[tone], className)}>
+    <div className={cn('fade-enter flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed', tones[tone], className)}>
+      {icon ? <Icon className="h-4 w-4 shrink-0 self-start opacity-80 [margin-top:3px]" /> : null}
       <div className="min-w-0 flex-1">{children}</div>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="-my-1 shrink-0">{action}</div> : null}
     </div>
   )
 }
@@ -83,10 +95,10 @@ export function Notice({
 export function Typing({ label, className }: { label?: string; className?: string }) {
   return (
     <span className={cn('inline-flex items-center gap-2 text-[13px] text-muted', className)}>
-      <span className="inline-flex gap-1" aria-hidden>
-        <span className="typing-dot h-1.5 w-1.5 rounded-full bg-current" />
-        <span className="typing-dot h-1.5 w-1.5 rounded-full bg-current" />
-        <span className="typing-dot h-1.5 w-1.5 rounded-full bg-current" />
+      <span className="inline-flex gap-[3px]" aria-hidden>
+        <span className="typing-dot h-[5px] w-[5px] rounded-full bg-current" />
+        <span className="typing-dot h-[5px] w-[5px] rounded-full bg-current" />
+        <span className="typing-dot h-[5px] w-[5px] rounded-full bg-current" />
       </span>
       {label}
     </span>

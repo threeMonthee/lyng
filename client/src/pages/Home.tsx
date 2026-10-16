@@ -1,9 +1,9 @@
-import { ArrowRight, Feather, Sparkles } from 'lucide-react'
+import { ChevronRight, Feather, Sparkles } from 'lucide-react'
 import { Link } from 'react-router'
 import { useHome, errorMessage } from '@/lib/query'
 import { shortTime } from '@/lib/format'
-import { Card, Page, PageHeader, Section } from '@/components/app/PageHeader'
-import { ChatRow, LinkRow, SceneCard } from '@/components/app/summaries'
+import { Card, Page, PageHeader, Section, SectionLink } from '@/components/app/PageHeader'
+import { CHAT_LIST_INSET, ChatRow, LinkRow, SceneCard } from '@/components/app/summaries'
 import { Avatar, AvatarStack } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Empty, ErrorState, Notice, PageLoading } from '@/components/ui/feedback'
@@ -52,7 +52,7 @@ function HomeBody() {
         action={
           <Link to="/create">
             <Button size="lg">
-              <Sparkles className="h-4 w-4" />
+              <Sparkles />
               一念生
             </Button>
           </Link>
@@ -65,17 +65,17 @@ function HomeBody() {
   return (
     <div>
       {data.fake ? (
-        <Notice tone="warn" className="mb-6">
-          现在是替身模式：人物的话由程序按固定规则拼出来，没有调用模型，只用来看界面和流程。
+        <Notice tone="warn" className="mb-7">
+          替身模式：人物的话由程序按固定规则拼出来，不调用模型，只用来看界面和流程。
         </Notice>
       ) : null}
 
       {data.drafts.length > 0 ? (
         <Section title="没写完的一念">
-          <Card className="divide-y divide-border overflow-hidden">
+          <Card className="list overflow-hidden">
             {data.drafts.map((d) => (
               <LinkRow key={d.id} to={`/create/${d.id}`} hint={shortTime(d.updatedAt)}>
-                <div className="truncate">{d.request}</div>
+                <div className="truncate font-serif">{d.request}</div>
                 <div className="mt-0.5 text-[12px] text-muted">
                   {d.worldName ? `给「${d.worldName}」添人物 · ` : ''}
                   {draftStatus[d.status] ?? d.status}
@@ -100,12 +100,15 @@ function HomeBody() {
         <Section
           title="私聊"
           action={
-            <Link to="/messages" className="text-[13px] text-accent">
-              全部
+            <Link to="/messages">
+              <SectionLink>
+                全部
+                <ChevronRight />
+              </SectionLink>
             </Link>
           }
         >
-          <Card className="divide-y divide-border overflow-hidden">
+          <Card className="list overflow-hidden" style={CHAT_LIST_INSET}>
             {data.chats.map((c) => (
               <ChatRow key={c.id} chat={c} showWorld={data.worlds.length > 1} />
             ))}
@@ -119,31 +122,33 @@ function HomeBody() {
             <Link
               key={w.id}
               to={`/worlds/${w.id}`}
-              className="group rounded-2xl border border-border bg-surface p-4 shadow-card transition hover:border-accent/30"
+              className="group flex flex-col rounded-2xl bg-surface p-4 shadow-card transition-shadow duration-200 hover:shadow-raised"
             >
               <div className="flex items-center gap-3">
-                <Avatar name={w.name} size={40} />
+                <Avatar name={w.name} size={42} square />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-serif text-[17px] font-semibold">{w.name}</div>
-                  <div className="text-[12px] text-muted">
+                  <div className="truncate font-serif text-[18px] font-semibold leading-snug">{w.name}</div>
+                  <div className="mt-0.5 text-[12px] text-muted">
                     {w.characters.length} 个人物 · {w.scenes > 0 ? `${w.scenes} 场戏` : '还没有戏'}
-                    {w.busy ? ' · 有一场正在进行' : ''}
+                    {w.busy ? <span className="text-accent"> · 有一场正在进行</span> : null}
                   </div>
                 </div>
-                <ArrowRight className="h-4 w-4 text-faint transition group-hover:translate-x-0.5" />
+                <ChevronRight className="h-4 w-4 shrink-0 text-faint transition-transform group-hover:translate-x-0.5" />
               </div>
-              <div className="mt-3 flex items-center gap-2">
-                <AvatarStack names={w.characters.map((c) => c.name)} />
+              <div className="mt-3.5 flex items-center gap-2 border-t border-border/70 pt-3">
+                <AvatarStack names={w.characters.map((c) => c.name)} size={20} />
                 <span className="truncate text-[13px] text-muted">{w.characters.map((c) => c.name).join('、')}</span>
               </div>
             </Link>
           ))}
           <Link
             to="/create"
-            className="flex min-h-28 flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border p-4 text-muted transition hover:border-accent/40 hover:text-accent"
+            className="group flex min-h-[118px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border p-4 text-muted transition-colors hover:border-accent/40 hover:bg-accent-soft/40 hover:text-accent"
           >
-            <Sparkles className="h-5 w-5" />
-            <span className="text-[14px]">一念生 · 再造一个世界</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 transition-colors group-hover:bg-accent-soft">
+              <Sparkles className="h-[18px] w-[18px]" />
+            </span>
+            <span className="text-[14px]">一念生，再造一个世界</span>
           </Link>
         </div>
       </Section>

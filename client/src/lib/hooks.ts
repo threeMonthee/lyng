@@ -104,29 +104,51 @@ export function usePresence() {
   }, [client])
 }
 
-/** 滚到底部；用户往上翻看时不打扰。 */
+/**
+ * 新内容来了就滚到底部；用户往上翻看时不打扰，只亮出“回到底部”。
+ * ref 是回调形式：列表在加载完之后才出现，也能挂上监听。
+ */
 export function useStickToBottom(deps: unknown[]) {
-  const ref = useRef<HTMLDivElement>(null)
+  const [el, setEl] = useState<HTMLDivElement | null>(null)
   const pinned = useRef(true)
+  const [away, setAway] = useState(false)
   useEffect(() => {
-    const el = ref.current
     if (!el) return
+    el.scrollTop = el.scrollHeight
     const onScroll = () => {
-      pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+      const near = el.scrollHeight - el.scrollTop - el.clientHeight < 120
+      pinned.current = near
+      setAway(!near)
     }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [el])
   useEffect(() => {
-    const el = ref.current
     if (el && pinned.current) el.scrollTop = el.scrollHeight
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
-  const toBottom = useCallback(() => {
-    const el = ref.current
-    if (!el) return
-    pinned.current = true
-    el.scrollTop = el.scrollHeight
-  }, [])
-  return { ref, toBottom }
+  }, [el, ...deps])
+  const toBottom = useCallback(
+    (smooth?: boolean) => {
+      if (!el) return
+      pinned.current = true
+      setAway(false)
+      el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' })
+    },
+    [el],
+  )
+  return { ref: setEl, toBottom, away }
+}
+
+/** 页面往下滚了一点：顶栏才显出分隔线。 */
+export function useScrolled(threshold = 4) {
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const main = document.querySelector('main')
+    if (!main) return
+    const onScroll = () => setScrolled(main.scrollTop > threshold)
+    onScroll()
+    main.addEventListener('scroll', onScroll, { passive: true })
+    return () => main.removeEventListener('scroll', onScroll)
+  }, [threshold])
+  return scrolled
 }

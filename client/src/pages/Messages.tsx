@@ -2,7 +2,7 @@ import { MessageCircle, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useChats, errorMessage, useHome } from '@/lib/query'
 import { Card, Page, PageHeader } from '@/components/app/PageHeader'
-import { ChatRow } from '@/components/app/summaries'
+import { CHAT_LIST_INSET, ChatRow } from '@/components/app/summaries'
 import { NewChatSheet } from '@/components/app/NewChat'
 import { Button } from '@/components/ui/button'
 import { Empty, ErrorState, PageLoading } from '@/components/ui/feedback'
@@ -18,8 +18,8 @@ export function MessagesPage() {
         title="消息"
         large
         actions={
-          <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button size="sm" variant="secondary" className="mr-1.5 rounded-full pl-2.5" onClick={() => setOpen(true)}>
+            <Plus />
             新的私聊
           </Button>
         }
@@ -38,7 +38,10 @@ export function MessagesPage() {
             附身一个人物，给另一个人物发消息。他们不在一起的时候，也会记得彼此说过的话；有心事的人，可能会在你回来时主动找你。
           </Empty>
         ) : (
-          <Card className="divide-y divide-border overflow-hidden rounded-none border-x-0 md:rounded-2xl md:border-x">
+          <Card
+            className="list overflow-hidden rounded-none bg-transparent shadow-none md:rounded-2xl md:bg-surface md:shadow-card"
+            style={CHAT_LIST_INSET}
+          >
             {chats.data.map((c) => (
               <ChatRow key={c.id} chat={c} showWorld={many} />
             ))}

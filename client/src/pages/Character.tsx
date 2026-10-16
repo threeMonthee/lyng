@@ -1,4 +1,4 @@
-import { Clapperboard, History, MessageCircle } from 'lucide-react'
+import { ChevronRight, Clapperboard, History, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -11,9 +11,9 @@ import { cn } from '@/lib/cn'
 import { Card, Page, PageHeader } from '@/components/app/PageHeader'
 import { RunList } from '@/components/app/RunList'
 import { NewChatSheet } from '@/components/app/NewChat'
-import { ChatRow } from '@/components/app/summaries'
+import { CHAT_LIST_INSET, ChatRow } from '@/components/app/summaries'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Button, LinkButton } from '@/components/ui/button'
 import { Empty, ErrorState, PageLoading } from '@/components/ui/feedback'
 import { Sheet } from '@/components/ui/sheet'
 import { TabPanel, Tabs } from '@/components/ui/tabs'
@@ -56,44 +56,49 @@ export function CharacterPageView() {
   const active = c.concerns.filter((x) => x.status === 'active').length
   return (
     <>
-      <PageHeader title={c.name} subtitle={c.worldName} back={`/worlds/${c.worldId}`} />
+      <PageHeader title={c.name} subtitle={c.worldName} back={`/worlds/${c.worldId}`} quietTitle />
       <Page>
         <div className="flex items-center gap-4">
-          <Avatar name={c.name} size={64} />
+          <Avatar name={c.name} size={72} />
           <div className="min-w-0 flex-1">
-            <div className="font-serif text-[24px] font-semibold leading-tight">{c.name}</div>
+            <div className="truncate font-serif text-[26px] font-semibold leading-tight">{c.name}</div>
             <div className="mt-1 text-[13px] text-muted">
-              <Link to={`/worlds/${c.worldId}`} className="hover:text-text">
+              <Link to={`/worlds/${c.worldId}`} className="transition-colors hover:text-text">
                 {c.worldName}
               </Link>
-              {' · '}
-              {c.memories} 段记忆 · {active} 件放不下的事
+              <span className="mx-1.5 text-faint">·</span>
+              {c.memories} 段记忆
+              <span className="mx-1.5 text-faint">·</span>
+              {active} 件放不下的事
             </div>
             {c.openScene ? (
-              <Link to={`/scenes/${c.openScene.id}`} className="mt-1 inline-block text-[13px] text-accent">
-                正在第{c.openScene.number}场里 →
+              <Link
+                to={`/scenes/${c.openScene.id}`}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-0.5 text-[12px] font-medium text-accent transition-colors hover:bg-accent-soft/70"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                正在第{c.openScene.number}场里
+                <ChevronRight className="-mr-1 h-3.5 w-3.5" />
               </Link>
             ) : null}
           </div>
         </div>
-        <div className="mt-4 flex gap-2">
+        <div className="mt-5 flex gap-2">
           <Button variant="outline" className="flex-1" disabled={c.others.length === 0} onClick={() => setChatOpen(true)}>
-            <MessageCircle className="h-4 w-4" />
+            <MessageCircle />
             私聊
           </Button>
-          <Link to={`/worlds/${c.worldId}/new-scene`} className="flex-1">
-            <Button variant="outline" className="w-full" disabled={!!c.openScene}>
-              <Clapperboard className="h-4 w-4" />
-              开一场戏
-            </Button>
-          </Link>
+          <LinkButton to={`/worlds/${c.worldId}/new-scene`} variant="outline" className="flex-1" disabled={!!c.openScene}>
+            <Clapperboard />
+            开一场戏
+          </LinkButton>
         </div>
 
         <Tabs
-          className="mt-6"
+          className="mt-7"
           value={tab}
           onValueChange={(v) => setParams(v === 'about' ? {} : { tab: v }, { replace: true })}
-          tabs={TABS.map((t) => (t.value === 'concerns' && active > 0 ? { ...t, label: `牵挂 ${active}` } : t))}
+          tabs={TABS.map((t) => (t.value === 'concerns' ? { ...t, count: active } : t))}
         >
           <TabPanel value="about">
             <About c={c} />
@@ -138,7 +143,7 @@ function About({ c }: { c: CharacterPage }) {
     <div className="space-y-4">
       <Card className="p-5">
         <div className="flex items-center justify-between">
-          <div className="text-[13px] font-medium">如今的自己</div>
+          <div className="text-[13px] font-medium text-muted">如今的自己</div>
           {c.selfVersions > 1 ? (
             <button onClick={() => setHistory(true)} className="inline-flex items-center gap-1 text-[12px] text-muted hover:text-text">
               <History className="h-3.5 w-3.5" />
@@ -148,7 +153,7 @@ function About({ c }: { c: CharacterPage }) {
         </div>
         {c.self ? (
           <>
-            <p className="prose-life mt-2 text-[15px]">{c.self.text}</p>
+            <p className="prose-life mt-2.5 text-[15px]">{c.self.text}</p>
             <div className="mt-2 flex gap-3 text-[12px] text-faint">
               <span>{shortTime(c.self.createdAt)}写下</span>
               <RunLink runId={c.self.runId} />
@@ -161,24 +166,26 @@ function About({ c }: { c: CharacterPage }) {
         )}
       </Card>
       {c.chats.length > 0 ? (
-        <Card className="divide-y divide-border overflow-hidden">
+        <Card className="list overflow-hidden" style={CHAT_LIST_INSET}>
           {c.chats.map((x) => (
             <ChatRow key={x.id} chat={x} perspective={c.id} />
           ))}
         </Card>
       ) : null}
       <Card className="p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-[13px] font-medium">出生档案</div>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="text-[13px] font-medium text-muted">出生档案</div>
           <span className="text-[12px] text-faint">{fullTime(c.createdAt)} 诞生</span>
         </div>
-        <div className="space-y-4">
-          {profileSections(c.profile).map((s, i) => (
-            <div key={i}>
-              {s.title ? <div className="mb-0.5 text-[12px] font-medium text-muted">{s.title}</div> : null}
-              <p className="prose-life text-[14.5px]">{s.body}</p>
-            </div>
-          ))}
+        <div className="space-y-5">
+          {profileSections(c.profile)
+            .filter((s) => s.title || s.body.replace(/^#+\s*/, '').trim() !== c.name)
+            .map((s, i) => (
+              <div key={i}>
+                {s.title ? <div className="mb-1 text-[12px] font-medium tracking-wide text-faint">{s.title}</div> : null}
+                <p className="prose-life text-[15px]">{s.body}</p>
+              </div>
+            ))}
         </div>
       </Card>
       <HistorySheet
@@ -220,7 +227,7 @@ function HistorySheet({
                 <span>{h.createdAt ? fullTime(h.createdAt) : ''}</span>
                 {h.runId ? <RunLink runId={h.runId} /> : <span>诞生时</span>}
               </div>
-              <p className={cn('prose-life mt-1 text-[14.5px]', i > 0 && 'text-muted')}>{h.text}</p>
+              <p className={cn('prose-life mt-1 text-[15px]', i > 0 && 'text-muted')}>{h.text}</p>
             </li>
           ))}
         </ol>
@@ -239,19 +246,19 @@ function Concerns({ items }: { items: ConcernItem[] }) {
         if (list.length === 0) return null
         return (
           <div key={g}>
-            <div className="mb-2 text-[12px] text-muted">
+            <div className="mb-2.5 text-[12px] font-medium text-faint">
               {concernStatusLabel[g]} · {list.length}
             </div>
             <div className="space-y-2">
               {list.map((x) => (
-                <Card key={x.id} className={cn('p-4', g !== 'active' && 'opacity-75')}>
+                <Card key={x.id} className={cn('p-4', g !== 'active' && 'bg-surface/60 shadow-none ring-1 ring-border/70')}>
                   {x.aboutName ? (
-                    <span className="mb-1.5 inline-flex items-center gap-1.5 text-[12px] text-muted">
+                    <span className="mb-2 inline-flex items-center gap-1.5 text-[12px] text-muted">
                       <Avatar name={x.aboutName} size={18} />
                       关于{x.aboutName}
                     </span>
                   ) : null}
-                  <p className="prose-life text-[14.5px]">{x.text}</p>
+                  <p className={cn('prose-life text-[15px]', g !== 'active' && 'text-muted')}>{x.text}</p>
                   {x.resolution ? <p className="mt-1.5 text-[13px] text-muted">了结：{x.resolution}</p> : null}
                   <div className="mt-2 flex gap-3 text-[12px] text-faint">
                     <span>{x.runId ? `${shortTime(x.updatedAt)}` : '诞生时就有'}</span>
@@ -290,7 +297,7 @@ function MemoriesTab({ id }: { id: string }) {
       {items.map((m) => (
         <Card key={m.id} className="p-4">
           <p className="prose-life text-[15px]">{m.event}</p>
-          {m.meaning ? <p className="prose-life mt-1.5 text-[13.5px] text-muted">{m.meaning}</p> : null}
+          {m.meaning ? <p className="prose-life mt-2 border-l-2 border-border pl-3 text-[14px] leading-[1.8] text-muted">{m.meaning}</p> : null}
           <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-faint">
             {m.people.length > 0 ? (
               <span className="inline-flex items-center gap-1">
@@ -345,7 +352,7 @@ function Views({ c }: { c: CharacterPage }) {
               </button>
             ) : null}
           </div>
-          <p className="prose-life mt-2 text-[14.5px]">{v.text}</p>
+          <p className="prose-life mt-2.5 text-[15px]">{v.text}</p>
           <div className="mt-2 flex gap-3 text-[12px] text-faint">
             <span>{v.runId ? shortTime(v.createdAt) : '诞生时'}</span>
             <RunLink runId={v.runId} />
@@ -376,16 +383,17 @@ function Experiences({ c }: { c: CharacterPage }) {
       <p className="mb-3 text-[13px] leading-relaxed text-muted">
         这是{c.name}亲眼看到、亲耳听到的原样经历，不含别人的心声。整理内心和回想时，TA 依据的就是这些。
       </p>
-      <Card className="divide-y divide-border overflow-hidden">
+      <Card className="list overflow-hidden">
         {sources.data.map((s) => (
-          <button key={s.sourceId} onClick={() => setOpen(s)} className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-surface-2/60">
+          <button key={s.sourceId} onClick={() => setOpen(s)} className="group flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-2/50">
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[14px]">{s.sourceLabel}</div>
+              <div className="truncate text-[15px]">{s.sourceLabel}</div>
               <div className="mt-0.5 text-[12px] text-muted">
                 {s.sourceKind === 'scene' ? '一场戏' : '私聊'} · {s.lines} 句
               </div>
             </div>
-            <span className="shrink-0 text-[12px] text-faint">{shortTime(s.lastAt)}</span>
+            <span className="shrink-0 text-[12px] tabular-nums text-faint">{shortTime(s.lastAt)}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-faint transition-transform group-hover:translate-x-0.5" />
           </button>
         ))}
       </Card>
@@ -411,7 +419,7 @@ function TraceSheet({ characterId, source, onClose }: { characterId: string; sou
       ) : (
         <div className="space-y-2">
           {traces.data.pages.flat().map((t) => (
-            <p key={t.id} className="prose-life text-[14px]">
+            <p key={t.id} className="prose-life text-[15px]">
               {t.text}
             </p>
           ))}

@@ -1,3 +1,4 @@
+import { Clapperboard } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
@@ -7,7 +8,7 @@ import { scaleLabel } from '@/lib/labels'
 import { Page, PageHeader, Section } from '@/components/app/PageHeader'
 import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { OptionRow, Segmented } from '@/components/ui/choice'
+import { Chip, OptionRow, Segmented, Suggestion } from '@/components/ui/choice'
 import { ErrorState, Notice, PageLoading } from '@/components/ui/feedback'
 import { Textarea } from '@/components/ui/field'
 
@@ -96,12 +97,10 @@ export function NewScenePage() {
                 selected={cast.includes(c.id)}
                 disabled={!!c.openScene}
                 onClick={() => toggle(c.id)}
+                leading={<Avatar name={c.name} size={32} />}
                 hint={c.openScene ? `在第${c.openScene.number}场里，先结束那一场` : undefined}
               >
-                <span className="flex items-center gap-2.5">
-                  <Avatar name={c.name} size={28} />
-                  <span className="text-[15px]">{c.name}</span>
-                </span>
+                {c.name}
               </OptionRow>
             ))}
           </div>
@@ -109,16 +108,19 @@ export function NewScenePage() {
 
         <Section title="你是谁">
           {chosen.length === 0 ? (
-            <p className="text-[13px] text-muted">先选在场的人物。</p>
+            <p className="rounded-[14px] border border-dashed border-border px-4 py-3.5 text-[13px] text-faint">先选在场的人物。</p>
           ) : (
             <div className="space-y-2">
+              <p className="mb-3 text-[12px] leading-relaxed text-muted">
+                {chosen.length < 2 ? '只有一个人在场时只能旁观。' : '附身一个人：你替 TA 说话、行动，其他人由他们自己决定。'}
+              </p>
               {chosen.map((c) => (
                 <OptionRow
                   key={c.id}
                   selected={identity === c.id}
                   disabled={chosen.length < 2}
                   onClick={() => setIdentity(c.id)}
-                  hint={chosen.length < 2 ? '只有一个人在场时只能旁观' : '你替 TA 说话、行动，其他人由他们自己决定'}
+                  leading={<Avatar name={c.name} size={28} />}
                 >
                   附身{c.name}
                 </OptionRow>
@@ -127,21 +129,13 @@ export function NewScenePage() {
                 旁观
               </OptionRow>
               {watching ? (
-                <div className="pl-1 pt-2">
+                <div className="fade-enter px-1 pt-3">
                   <div className="mb-2 text-[12px] text-muted">镜头跟着谁</div>
                   <div className="flex flex-wrap gap-2">
                     {chosen.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => setFollow(c.id)}
-                        className={
-                          follow === c.id
-                            ? 'rounded-full border border-accent bg-accent px-3 py-1 text-[13px] text-accent-fg'
-                            : 'rounded-full border border-border px-3 py-1 text-[13px]'
-                        }
-                      >
+                      <Chip key={c.id} selected={follow === c.id} onClick={() => setFollow(c.id)} leading={<Avatar name={c.name} size={22} />}>
                         {c.name}
-                      </button>
+                      </Chip>
                     ))}
                   </div>
                 </div>
@@ -170,33 +164,30 @@ export function NewScenePage() {
             onChange={(e) => setSetup(e.target.value)}
             placeholder="在哪里、什么时候、发生了什么。一两句就够。"
             maxHeight={200}
-            className="min-h-24"
+            className="min-h-28 font-serif leading-[1.8]"
           />
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
             {SETUPS.map((s) => (
-              <button
-                key={s}
-                onClick={() => setSetup(s)}
-                className="rounded-full bg-surface-2 px-2.5 py-1 text-[12px] text-muted hover:text-text"
-              >
+              <Suggestion key={s} onClick={() => setSetup(s)}>
                 {s}
-              </button>
+              </Suggestion>
             ))}
           </div>
         </Section>
 
-        <div className="mt-8 space-y-3">
-          <p className="text-[12px] text-muted">
-            内容尺度：{scaleLabel[settings.data?.scale ?? 'mild']}（
-            <Link to="/settings" className="text-accent">
-              在设置里改
-            </Link>
-            ，只影响之后开的戏）
-          </p>
+        <div className="mt-10 space-y-3">
           {error ? <Notice tone="danger">{error}</Notice> : null}
           <Button size="lg" className="w-full" disabled={!valid} loading={saving} onClick={create}>
+            <Clapperboard />
             开场
           </Button>
+          <p className="text-center text-[12px] text-faint">
+            内容尺度：{scaleLabel[settings.data?.scale ?? 'mild']}，
+            <Link to="/settings" className="text-muted underline decoration-border underline-offset-2 hover:text-text">
+              在设置里改
+            </Link>
+            ，只影响之后开的戏
+          </p>
         </div>
       </Page>
     </>

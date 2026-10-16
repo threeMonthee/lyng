@@ -72,7 +72,7 @@ export function RunPageView() {
 
         {outcome && Object.keys(outcome).length > 0 ? (
           <Section title="最后的结果" className="mt-8">
-            <Card className="divide-y divide-border">
+            <Card className="list overflow-hidden">
               {Object.entries(outcome).map(([k, v]) => (
                 <div key={k} className="px-4 py-3">
                   <div className="text-[12px] text-muted">{k}</div>
@@ -115,7 +115,7 @@ export function RunPageView() {
 
         {calls.length > 0 ? (
           <Section title="每一次调用" className="mt-8">
-            <Card className="divide-y divide-border">
+            <Card className="list overflow-hidden">
               {calls.map((c, i) => (
                 <div key={i} className="px-4 py-3 text-[13px]">
                   <div className="flex items-center gap-2">
@@ -208,7 +208,7 @@ function Fold({ text, label, open: initial }: { text: string; label?: string; op
         </button>
       ) : null}
       {open || !label ? (
-        <div className={cn('relative', label && 'border-t border-border')}>
+        <div className={cn('relative', label && 'border-t border-border/70')}>
           <pre
             className={cn(
               'whitespace-pre-wrap break-words px-4 py-3 font-sans text-[13px] leading-relaxed',

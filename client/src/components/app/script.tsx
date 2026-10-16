@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import type { Line, Person } from '@/lib/types'
 import { cn } from '@/lib/cn'
 import { Avatar } from '@/components/ui/avatar'
+import { Typing } from '@/components/ui/feedback'
 
 /** 场上的一段：叙事、收尾，或同一个人在同一轮里连着的几句话与心声。 */
 export type Block =
@@ -34,23 +35,50 @@ export function toBlocks(lines: Line[]): Block[] {
   return blocks
 }
 
+/** 一场开头：第几场和开场处境。 */
+export function SceneOpening({ number, setup }: { number: number; setup: string }) {
+  return (
+    <div className="fade-enter mb-8 mt-3 text-center">
+      <Ornament>第 {number} 场</Ornament>
+      <p className="prose-life mx-auto mt-3 max-w-md text-[14px] leading-[1.8] text-muted">{setup}</p>
+    </div>
+  )
+}
+
+/** 两侧一道细线，中间几个字。 */
+export function Ornament({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex items-center justify-center gap-3 text-[11px] tracking-[0.35em] text-faint">
+      <span className="h-px w-8 bg-border" />
+      <span className="pl-[0.35em]">{children}</span>
+      <span className="h-px w-8 bg-border" />
+    </div>
+  )
+}
+
 export function Narration({ text, closing }: { text: string; closing?: boolean }) {
   return (
-    <div className="mx-auto my-5 max-w-[34rem] px-2">
-      {closing ? <div className="mb-2 text-center text-[11px] tracking-[0.3em] text-faint">— 收尾 —</div> : null}
-      <p className="prose-life text-[15px] text-text/80">{text}</p>
+    <div className={cn('enter my-7', closing && 'mt-10')}>
+      {closing ? (
+        <div className="mb-4">
+          <Ornament>收尾</Ornament>
+        </div>
+      ) : null}
+      <p className="prose-life text-[15.5px] leading-[1.95] text-text/85">{text}</p>
     </div>
   )
 }
 
 export function InnerVoice({ text, className }: { text: string; className?: string }) {
   return (
-    <div className={cn('mt-1.5 max-w-[30rem] border-l-2 border-inner/40 pl-2.5', className)}>
-      <span className="mr-1.5 text-[11px] text-inner/80">心声</span>
-      <span className="prose-life text-[13.5px] leading-relaxed text-inner">{text}</span>
+    <div className={cn('fade-enter flex w-fit max-w-[32rem] items-baseline gap-2 rounded-[14px] bg-inner-soft px-3 py-1.5', className)}>
+      <span className="shrink-0 text-[11px] font-medium text-inner/75">心声</span>
+      <p className="prose-life text-[14px] leading-[1.75] text-inner">{text}</p>
     </div>
   )
 }
+
+const bubble = 'w-fit max-w-[32rem] whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[15px] leading-[1.65]'
 
 /** 一个人在这一轮里的言行。byUser 的一段靠右（你做的），其余靠左。 */
 export function PersonBlock({
@@ -72,19 +100,19 @@ export function PersonBlock({
 }) {
   if (byUser) {
     return (
-      <div className="my-3 flex flex-col items-end pl-10">
-        <div className="mb-1 text-[11px] text-faint">你 · {person.name}</div>
+      <div className="enter my-6 flex flex-col items-end gap-1.5 pl-12">
+        <div className="text-[12px] text-faint">你 · {person.name}</div>
         {lines.map((l, i) =>
           l.kind === 'wait' ? (
             <div key={i} className="rounded-full bg-surface-2 px-3 py-1 text-[12px] text-muted">
               静候
             </div>
           ) : l.kind === 'do' ? (
-            <p key={i} className="prose-life my-0.5 max-w-[30rem] text-right text-[14.5px] text-muted">
+            <p key={i} className="prose-life max-w-[32rem] text-right text-[15px] leading-[1.8] text-muted">
               {l.text}
             </p>
           ) : (
-            <div key={i} className="my-0.5 max-w-[30rem] rounded-2xl rounded-tr-md bg-me px-3.5 py-2 text-[15px] leading-relaxed text-me-fg">
+            <div key={i} className={cn(bubble, 'rounded-tr-[6px] bg-me text-me-fg')}>
               {l.text}
             </div>
           ),
@@ -94,29 +122,40 @@ export function PersonBlock({
   }
   const silent = lines.length > 0 && lines.every((l) => l.kind === 'wait')
   return (
-    <div className={cn('my-3 flex gap-2.5 pr-8', live && 'opacity-75')}>
-      <Link to={`/characters/${person.id}`} className="shrink-0 pt-0.5">
-        <Avatar name={person.name} size={32} />
+    <div className={cn('my-6 flex gap-2.5 pr-8 md:pr-12', !live && 'enter')}>
+      <Link to={`/characters/${person.id}`} className="shrink-0 transition-opacity hover:opacity-80">
+        <Avatar name={person.name} size={30} />
       </Link>
-      <div className="min-w-0 flex-1">
-        <div className="mb-1 text-[12px] font-medium text-muted">{person.name}</div>
+      <div className="flex min-w-0 flex-1 flex-col items-start gap-1.5">
+        <Link to={`/characters/${person.id}`} className="flex h-[30px] items-center text-[13px] font-medium text-text/75 hover:text-text">
+          {person.name}
+        </Link>
         {silent ? <p className="text-[13px] text-faint">没有作声</p> : null}
         {lines
           .filter((l) => l.kind !== 'wait')
           .map((l, i) =>
             l.kind === 'do' ? (
-              <p key={i} className="prose-life my-0.5 max-w-[30rem] text-[14.5px] text-muted">
+              <p key={i} className="prose-life max-w-[32rem] text-[15px] leading-[1.8] text-muted">
                 {l.text}
               </p>
             ) : (
-              <div key={i} className="my-0.5 w-fit max-w-[30rem] rounded-2xl rounded-tl-md border border-border bg-surface px-3.5 py-2 text-[15px] leading-relaxed">
+              <div key={i} className={cn(bubble, 'rounded-tl-[6px] bg-surface shadow-card', live && 'opacity-80')}>
                 {l.text}
               </div>
             ),
           )}
-        {inner && showInner ? <InnerVoice text={inner} /> : null}
+        {inner && showInner ? <InnerVoice text={inner} className="mt-0.5" /> : null}
         {footer}
       </div>
+    </div>
+  )
+}
+
+/** 正在写的那一句：一个装着三个点的气泡。 */
+export function TypingBubble({ className }: { className?: string }) {
+  return (
+    <div className={cn('fade-enter flex h-[38px] w-fit items-center rounded-[18px] rounded-tl-[6px] bg-surface px-4 shadow-card', className)}>
+      <Typing />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Flag, Globe, MoreHorizontal, RotateCw, ScrollText, Users } from 'lucide-react'
+import { AlertCircle, ChevronRight, Clapperboard, Eye, EyeOff, Flag, Globe, Hourglass, MoreHorizontal, RotateCw, ScrollText, Users } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -8,14 +8,14 @@ import { errorMessage } from '@/lib/query'
 import { useShowInner, useStickToBottom } from '@/lib/hooks'
 import { toneLabel } from '@/lib/labels'
 import type { Line, Person, ScenePage } from '@/lib/types'
-import { cn } from '@/lib/cn'
 import { PageHeader } from '@/components/app/PageHeader'
 import { Composer } from '@/components/app/Composer'
-import { Narration, PersonBlock, toBlocks } from '@/components/app/script'
+import { JumpToBottom } from '@/components/app/JumpToBottom'
+import { Narration, Ornament, PersonBlock, SceneOpening, toBlocks, TypingBubble } from '@/components/app/script'
 import { identityText } from '@/components/app/summaries'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Segmented, OptionRow } from '@/components/ui/choice'
+import { Button, IconButton } from '@/components/ui/button'
+import { Chip, OptionRow, Segmented } from '@/components/ui/choice'
 import { ErrorState, Notice, PageLoading, Typing } from '@/components/ui/feedback'
 import { Menu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 import { Sheet } from '@/components/ui/sheet'
@@ -120,7 +120,7 @@ export function ScenePage() {
     }
   }, [scene, data?.pending.length, streaming, id, run])
 
-  const { ref: feedRef, toBottom } = useStickToBottom([data?.lines.length, drafts.length, status?.step, status?.speakerId, notice])
+  const { ref: feedRef, toBottom, away } = useStickToBottom([data?.lines.length, drafts.length, status?.step, status?.speakerId, notice])
 
   if (query.isPending) {
     return (
@@ -169,33 +169,41 @@ export function ScenePage() {
         byUser={false}
         showInner={false}
         live
-        footer={<Typing className="mt-1" />}
+        footer={<TypingBubble />}
       />
     )
   })()
+
+  const stepLabel: Record<string, string> = {
+    opening: '叙事者正在开场',
+    narrator: '叙事者在看',
+    closing: '叙事者正在收尾',
+    consent: '看看对方愿不愿意',
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         narrow
+        bordered
         back={`/worlds/${scene.worldId}`}
         title={`第${scene.number}场 · ${scene.worldName}`}
         subtitle={`${toneLabel[scene.tone]} · ${scene.cast.map((p) => p.name).join('、')}${open ? ` · ${identityText(scene)}` : ' · 已结束'}`}
         actions={
           <>
-            <button
+            <IconButton
               onClick={() => setShowInner(!showInner)}
-              className={cn('rounded-full p-2 hover:bg-surface-2', showInner ? 'text-inner' : 'text-faint')}
+              className={showInner ? 'text-inner hover:text-inner' : undefined}
               aria-label={showInner ? '隐藏心声' : '显示心声'}
               title={showInner ? '隐藏心声' : '显示心声'}
             >
-              {showInner ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-            </button>
+              {showInner ? <Eye /> : <EyeOff />}
+            </IconButton>
             <Menu
               trigger={
-                <button className="rounded-full p-2 text-text hover:bg-surface-2" aria-label="更多">
-                  <MoreHorizontal className="h-5 w-5" />
-                </button>
+                <IconButton aria-label="更多">
+                  <MoreHorizontal />
+                </IconButton>
               }
             >
               <MenuItem icon={<Users />} disabled={!open || busy} onSelect={() => setIdentityOpen(true)}>
@@ -216,118 +224,112 @@ export function ScenePage() {
         }
       />
 
-      <div ref={feedRef} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-2xl px-4 pb-6 pt-4">
-          {data.previousClosing ? (
-            <details className="mb-4 rounded-xl bg-surface-2/60 px-3.5 py-2.5 text-[13px] text-muted">
-              <summary className="cursor-pointer select-none">上一场的结尾</summary>
-              <p className="prose-life mt-2 text-[14px]">{data.previousClosing}</p>
-            </details>
-          ) : null}
-          <div className="mb-2 text-center">
-            <div className="text-[11px] tracking-[0.3em] text-faint">第{scene.number}场</div>
-            <p className="mx-auto mt-1.5 max-w-md text-[13px] leading-relaxed text-muted">{scene.setup}</p>
+      <div className="relative min-h-0 flex-1">
+        <div ref={feedRef} className="scrollbar-thin h-full overflow-y-auto">
+          <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-4">
+            {data.previousClosing ? (
+              <details className="group mb-6 rounded-2xl bg-surface-2/60 px-4 py-3 text-[13px] text-muted">
+                <summary className="flex list-none items-center gap-1.5 select-none [&::-webkit-details-marker]:hidden">
+                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-open:rotate-90" />
+                  上一场的结尾
+                </summary>
+                <p className="prose-life mt-2 text-[14px] leading-[1.85] text-text/75">{data.previousClosing}</p>
+              </details>
+            ) : null}
+            <SceneOpening number={scene.number} setup={scene.setup} />
+
+            {blocks.map((b) =>
+              b.type === 'narration' ? (
+                <Narration key={b.key} text={b.line.text} closing={b.line.kind === 'closing'} />
+              ) : (
+                <PersonBlock
+                  key={b.key}
+                  person={person(b.speakerId)}
+                  lines={b.lines}
+                  inner={b.inner?.text ?? null}
+                  byUser={b.byUser}
+                  showInner={showInner}
+                />
+              ),
+            )}
+
+            {draftBlock}
+            {status && status.step !== 'character' ? <Progress label={stepLabel[status.step] ?? '稍等'} /> : null}
+            {!streaming && scene.running ? <Progress label="这一场正在进行" /> : null}
+
+            {failed ? (
+              <div className="enter my-6 rounded-2xl bg-danger-soft/70 p-4 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--danger)_18%,transparent)]">
+                <p className="flex items-center gap-2 text-[14px] font-medium text-danger">
+                  <AlertCircle className="h-4 w-4" />
+                  {failedStep === 'opening'
+                    ? '开场没有写成'
+                    : failedStep === 'narrator'
+                      ? '叙事者这一步没有成功'
+                      : failedStep === 'closing'
+                        ? '收尾没有写成'
+                        : `${person(failedStep ?? '').name}这一步没有成功`}
+                </p>
+                <p className="mt-1 pl-6 text-[13px] leading-relaxed text-muted">{scene.failure}</p>
+                <div className="mt-3 flex flex-wrap gap-2 pl-6">
+                  <Button size="sm" onClick={() => run(`/scenes/${id}/resume`, {})}>
+                    <RotateCw />
+                    重试
+                  </Button>
+                  {failedStep === 'closing' ? (
+                    <Button size="sm" variant="outline" onClick={() => run(`/scenes/${id}/end`, { closing: false })}>
+                      不要收尾，直接结束
+                    </Button>
+                  ) : null}
+                  <Link to={failedRun ? `/runs/${failedRun}` : `/runs?sceneId=${id}`}>
+                    <Button size="sm" variant="ghost">
+                      看幕后
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {notice ? (
+              <Notice tone={notice.tone} className="my-5">
+                {notice.text}
+              </Notice>
+            ) : null}
+
+            {!open ? (
+              <div className="enter mx-auto mb-4 mt-12 max-w-md text-center">
+                <Ornament>终</Ornament>
+                <p className="mt-5 text-[16px] font-medium">这一场结束了</p>
+                <p className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed text-muted">
+                  在场的人会把这场经历按各自看到的整理进心里。去人物主页，看看他们记住了什么。
+                </p>
+                <div className="mt-5 flex justify-center gap-2">
+                  <Link to={`/worlds/${scene.worldId}`}>
+                    <Button variant="outline">回到{scene.worldName}</Button>
+                  </Link>
+                  <Link to={`/worlds/${scene.worldId}/new-scene`}>
+                    <Button>
+                      <Clapperboard />
+                      再开一场
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : null}
           </div>
-
-          {blocks.map((b) =>
-            b.type === 'narration' ? (
-              <Narration key={b.key} text={b.line.text} closing={b.line.kind === 'closing'} />
-            ) : (
-              <PersonBlock
-                key={b.key}
-                person={person(b.speakerId)}
-                lines={b.lines}
-                inner={b.inner?.text ?? null}
-                byUser={b.byUser}
-                showInner={showInner}
-              />
-            ),
-          )}
-
-          {draftBlock}
-          {status && status.step !== 'character' ? (
-            <div className="my-5 flex justify-center">
-              <Typing
-                label={
-                  { opening: '叙事者正在开场', narrator: '叙事者在看', closing: '叙事者正在收尾', consent: '看看对方愿不愿意' }[
-                    status.step
-                  ] ?? '稍等'
-                }
-              />
-            </div>
-          ) : null}
-          {!streaming && scene.running ? (
-            <div className="my-5 flex justify-center">
-              <Typing label="这一场正在进行" />
-            </div>
-          ) : null}
-
-          {failed ? (
-            <div className="my-5 rounded-2xl border border-danger/25 bg-danger-soft/60 p-4">
-              <p className="text-[14px] font-medium text-danger">
-                {failedStep === 'opening'
-                  ? '开场没有写成'
-                  : failedStep === 'narrator'
-                    ? '叙事者这一步没有成功'
-                    : failedStep === 'closing'
-                      ? '收尾没有写成'
-                      : `${person(failedStep ?? '').name}这一步没有成功`}
-              </p>
-              <p className="mt-1 text-[13px] leading-relaxed text-muted">{scene.failure}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => run(`/scenes/${id}/resume`, {})}>
-                  <RotateCw className="h-3.5 w-3.5" />
-                  重试
-                </Button>
-                {failedStep === 'closing' ? (
-                  <Button size="sm" variant="outline" onClick={() => run(`/scenes/${id}/end`, { closing: false })}>
-                    不要收尾，直接结束
-                  </Button>
-                ) : null}
-                <Link to={failedRun ? `/runs/${failedRun}` : `/runs?sceneId=${id}`}>
-                  <Button size="sm" variant="ghost">
-                    看幕后
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ) : null}
-
-          {notice ? (
-            <Notice tone={notice.tone} className="my-4">
-              {notice.text}
-            </Notice>
-          ) : null}
-
-          {!open ? (
-            <div className="my-8 rounded-2xl border border-border bg-surface p-5 text-center shadow-card">
-              <p className="text-[15px] font-medium">这一场结束了</p>
-              <p className="mx-auto mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted">
-                在场的人会把这场经历按各自看到的整理进心里，可以去人物主页看看他们记住了什么。
-              </p>
-              <div className="mt-4 flex justify-center gap-2">
-                <Link to={`/worlds/${scene.worldId}`}>
-                  <Button variant="outline" size="sm">
-                    回到{scene.worldName}
-                  </Button>
-                </Link>
-                <Link to={`/worlds/${scene.worldId}/new-scene`}>
-                  <Button size="sm">再开一场</Button>
-                </Link>
-              </div>
-            </div>
-          ) : null}
         </div>
+        <JumpToBottom show={away} onClick={() => toBottom(true)} />
       </div>
 
       {open ? (
-        <div className="pb-safe shrink-0 border-t border-border bg-bg/95 backdrop-blur">
-          <div className="mx-auto w-full max-w-2xl px-3 py-2.5">
+        <div className="pb-safe shrink-0 bg-bg shadow-[0_-1px_0_var(--border)]">
+          <div className="mx-auto w-full max-w-2xl px-3 pb-3 pt-2.5 md:px-4">
             {possessed ? (
               <>
-                <div className="mb-2 flex items-center gap-2">
-                  <Avatar name={possessed.name} size={22} />
-                  <span className="text-[12px] text-muted">你是{possessed.name}</span>
+                <div className="mb-2 flex items-center gap-2 px-1">
+                  <Avatar name={possessed.name} size={20} />
+                  <span className="min-w-0 truncate text-[12px] text-muted">
+                    你是<span className="font-medium text-text">{possessed.name}</span>
+                  </span>
                   <Segmented
                     size="sm"
                     className="ml-auto"
@@ -341,7 +343,8 @@ export function ScenePage() {
                   />
                 </div>
                 {action === 'wait' ? (
-                  <Button className="w-full" variant="secondary" disabled={busy || failed} onClick={submit}>
+                  <Button className="h-11 w-full rounded-[22px]" variant="outline" disabled={busy || failed} onClick={submit}>
+                    <Hourglass />
                     静候，看看他们怎么做
                   </Button>
                 ) : (
@@ -356,13 +359,16 @@ export function ScenePage() {
                 )}
               </>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 py-0.5 pl-1">
                 <div className="flex min-w-0 flex-1 items-center gap-2 text-[12px] text-muted">
-                  {follow ? <Avatar name={follow.name} size={22} /> : null}
-                  <span className="truncate">旁观中，镜头跟着{follow?.name}</span>
+                  {follow ? <Avatar name={follow.name} size={20} /> : null}
+                  <span className="truncate">
+                    旁观中，镜头跟着<span className="font-medium text-text">{follow?.name}</span>
+                  </span>
                 </div>
-                <Button disabled={busy || failed} onClick={() => run(`/scenes/${id}/act`, { action: 'continue' })}>
+                <Button className="rounded-full px-5" disabled={busy || failed} onClick={() => run(`/scenes/${id}/act`, { action: 'continue' })}>
                   继续
+                  <ChevronRight className="-mr-1" />
                 </Button>
               </div>
             )}
@@ -387,6 +393,7 @@ export function ScenePage() {
       >
         <div className="space-y-2">
           <Button
+            size="lg"
             className="w-full"
             onClick={() => {
               setEndOpen(false)
@@ -397,8 +404,9 @@ export function ScenePage() {
             让叙事者收个尾，再结束
           </Button>
           <Button
+            size="lg"
             className="w-full"
-            variant="outline"
+            variant="secondary"
             onClick={() => {
               setEndOpen(false)
               void run(`/scenes/${id}/end`, { closing: false })
@@ -408,6 +416,17 @@ export function ScenePage() {
           </Button>
         </div>
       </Sheet>
+    </div>
+  )
+}
+
+/** 叙事者或某一步正在进行：居中的一枚小标签。 */
+function Progress({ label }: { label: string }) {
+  return (
+    <div className="fade-enter my-6 flex justify-center">
+      <span className="rounded-full bg-surface-2/80 px-3.5 py-1.5">
+        <Typing label={label} />
+      </span>
     </div>
   )
 }
@@ -472,31 +491,27 @@ function IdentitySheet({
     >
       <div className="space-y-2">
         {cast.map((p) => (
-          <OptionRow key={p.id} selected={choice === p.id} onClick={() => setChoice(p.id)} disabled={cast.length < 2}>
-            <span className="flex items-center gap-2">
-              <Avatar name={p.name} size={24} />
-              附身{p.name}
-            </span>
+          <OptionRow
+            key={p.id}
+            selected={choice === p.id}
+            onClick={() => setChoice(p.id)}
+            disabled={cast.length < 2}
+            leading={<Avatar name={p.name} size={28} />}
+          >
+            附身{p.name}
           </OptionRow>
         ))}
         <OptionRow selected={choice === 'watch'} onClick={() => setChoice('watch')} hint="不扮演任何人，看他们自己发展">
           旁观
         </OptionRow>
         {choice === 'watch' ? (
-          <div className="pl-3 pt-1">
+          <div className="fade-enter px-1 pt-2">
             <div className="mb-2 text-[12px] text-muted">镜头跟着谁</div>
             <div className="flex flex-wrap gap-2">
               {cast.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setFollow(p.id)}
-                  className={cn(
-                    'rounded-full border px-3 py-1 text-[13px]',
-                    follow === p.id ? 'border-accent bg-accent text-accent-fg' : 'border-border',
-                  )}
-                >
+                <Chip key={p.id} selected={follow === p.id} onClick={() => setFollow(p.id)} leading={<Avatar name={p.name} size={22} />}>
                   {p.name}
-                </button>
+                </Chip>
               ))}
             </div>
           </div>

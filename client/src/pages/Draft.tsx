@@ -1,4 +1,4 @@
-import { Check, Lock, PenLine, RotateCw, Sparkles, Trash2, Wand2 } from 'lucide-react'
+import { Check, ChevronDown, Lock, PenLine, RotateCw, Sparkles, Trash2, Wand2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -10,8 +10,8 @@ import type { Answer, Born, Draft, DraftCharacter, DraftPage, Question, Revision
 import { cn } from '@/lib/cn'
 import { Card, Page, PageHeader, Section } from '@/components/app/PageHeader'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Chip } from '@/components/ui/choice'
+import { Button, IconButton } from '@/components/ui/button'
+import { Chip, Suggestion } from '@/components/ui/choice'
 import { ErrorState, Notice, PageLoading, Spinner, Typing } from '@/components/ui/feedback'
 import { Input, Label, Textarea } from '@/components/ui/field'
 import { Sheet } from '@/components/ui/sheet'
@@ -96,9 +96,9 @@ export function DraftPageView() {
     <>
       <PageHeader title={title} back={page.worldId ? `/worlds/${page.worldId}` : '/'} actions={<DeleteDraft page={page} />} />
       <Page>
-        <div className="mb-6 rounded-2xl bg-surface-2/70 px-4 py-3">
-          <div className="text-[11px] text-faint">你的一念</div>
-          <p className="mt-0.5 font-serif text-[16px] leading-relaxed">{page.request}</p>
+        <div className="mb-8 border-l-2 border-accent/40 py-0.5 pl-4">
+          <div className="text-[12px] text-faint">你的一念</div>
+          <p className="mt-1 font-serif text-[17px] leading-relaxed">{page.request}</p>
         </div>
         {page.status === 'asking' ? (
           <Asking page={page} onWrite={write} writing={writing} />
@@ -183,8 +183,8 @@ function Asking({ page, onWrite, writing }: { page: DraftPage; onWrite: (a: Answ
   const answers: Answer[] = questions.map((q: Question, i) => ({ question: q.question, answer: (custom[i]?.trim() || picked[i]) ?? '' }))
   return (
     <div>
-      <p className="mb-5 text-[14px] text-muted">动笔之前，有几件事想先问你。不确定就用推荐的。</p>
-      <div className="space-y-6">
+      <p className="mb-6 text-[14px] text-muted">动笔之前，有几件事想先问你。不确定就用推荐的。</p>
+      <div className="space-y-7">
         {questions.map((q, i) => (
           <div key={i}>
             <div className="mb-2.5 text-[15px] font-medium">{q.question}</div>
@@ -197,14 +197,14 @@ function Asking({ page, onWrite, writing }: { page: DraftPage; onWrite: (a: Answ
                     setPicked((p) => ({ ...p, [i]: o }))
                     setCustom((c) => ({ ...c, [i]: '' }))
                   }}
-                  badge={o === q.recommended ? <span className="text-[10px] opacity-70">推荐</span> : null}
+                  badge={o === q.recommended ? <span className="rounded-full bg-current/10 px-1.5 text-[10px] leading-4 opacity-80">推荐</span> : null}
                 >
                   {o}
                 </Chip>
               ))}
             </div>
             <Input
-              className="mt-2 h-9 text-[14px]"
+              className="mt-2.5"
               placeholder="或者自己写"
               value={custom[i] ?? ''}
               onChange={(e) => setCustom((c) => ({ ...c, [i]: e.target.value }))}
@@ -214,7 +214,7 @@ function Asking({ page, onWrite, writing }: { page: DraftPage; onWrite: (a: Answ
       </div>
       <div className="mt-8 flex gap-2">
         <Button size="lg" className="flex-1" disabled={writing} onClick={() => onWrite(answers)}>
-          <Sparkles className="h-4 w-4" />
+          <Sparkles />
           就这样，开始写
         </Button>
         <Button size="lg" variant="ghost" disabled={writing} onClick={() => onWrite([])}>
@@ -227,9 +227,11 @@ function Asking({ page, onWrite, writing }: { page: DraftPage; onWrite: (a: Answ
 
 function Writing({ progress, live }: { progress: Progress; live: boolean }) {
   return (
-    <div className="py-6">
-      <div className="mb-5 flex items-center gap-3">
-        <Spinner className="text-accent" />
+    <div className="fade-enter py-4">
+      <div className="mb-6 flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-soft">
+          <Spinner className="h-5 w-5 text-accent" />
+        </span>
         <div>
           <div className="text-[15px] font-medium">{progress.checking ? '正在检查前后是否一致' : '正在写'}</div>
           <div className="text-[12px] text-muted">
@@ -238,12 +240,12 @@ function Writing({ progress, live }: { progress: Progress; live: boolean }) {
         </div>
       </div>
       {progress.names.length > 0 ? (
-        <ol className="space-y-2 border-l border-border pl-4">
+        <ol className="ml-5 space-y-3 border-l border-border pl-5">
           {progress.names.map((n, i) => {
             const done = i < progress.names.length - 1 || progress.checking
             return (
-              <li key={n} className="flex items-center gap-2 text-[14px]">
-                {done ? <Check className="h-4 w-4 text-accent" /> : <Spinner className="h-4 w-4 text-muted" />}
+              <li key={n} className="enter flex items-center gap-2.5 text-[15px]">
+                {done ? <Check className="h-4 w-4 text-accent [stroke-width:2.5]" /> : <Spinner className="h-4 w-4 text-muted" />}
                 <span className={done ? 'text-text' : 'text-muted'}>{n === '世界' ? '世界' : n}</span>
               </li>
             )
@@ -296,16 +298,16 @@ function Review({ page, content, notice }: { page: DraftPage; content: Draft; no
   }
 
   return (
-    <div className="pb-24">
+    <div>
       <Section title="一致性">
         {page.conflicts === null ? (
           <Notice action={<Button size="sm" variant="outline" loading={checking} onClick={check}>检查</Button>}>
             {notice ?? '还没检查过前后是否矛盾。'}
           </Notice>
         ) : page.conflicts.length === 0 ? (
-          <Notice action={<Button size="sm" variant="ghost" loading={checking} onClick={check}>再查一次</Button>}>
-            <span className="inline-flex items-center gap-1.5">
-              <Check className="h-4 w-4 text-accent" />
+          <Notice icon={false} action={<Button size="sm" variant="ghost" loading={checking} onClick={check}>再查一次</Button>}>
+            <span className="inline-flex items-center gap-2 text-text/80">
+              <Check className="h-4 w-4 text-accent [stroke-width:2.5]" />
               没发现前后矛盾的地方
             </span>
           </Notice>
@@ -336,19 +338,22 @@ function Review({ page, content, notice }: { page: DraftPage; content: Draft; no
           }
         >
           <Card className="p-5">
-            <div className="font-serif text-[20px] font-semibold">{content.world.name}</div>
-            <p className="prose-life mt-3 text-[14.5px]">{content.world.publicText}</p>
+            <div className="flex items-center gap-3">
+              <Avatar name={content.world.name} size={40} square />
+              <div className="font-serif text-[20px] font-semibold">{content.world.name}</div>
+            </div>
+            <p className="prose-life mt-4 text-[15px]">{content.world.publicText}</p>
             <ReviseLink onClick={() => setRevising({ target: 'world.public', label: '世界·公开' })} />
           </Card>
           <Card className="mt-3 p-5">
-            <button className="flex w-full items-center gap-2 text-left text-[13px] font-medium" onClick={() => setRevealNarrator(!revealNarrator)}>
-              <Lock className="h-4 w-4 text-muted" />
+            <button className="flex w-full items-center gap-2 text-left text-[13px] font-medium text-muted" onClick={() => setRevealNarrator(!revealNarrator)}>
+              <Lock className="h-4 w-4" />
               只有叙事者知道
-              <span className="ml-auto text-[12px] font-normal text-faint">{revealNarrator ? '收起' : '展开'}</span>
+              <ChevronDown className={cn('ml-auto h-4 w-4 text-faint transition-transform', revealNarrator && 'rotate-180')} />
             </button>
             {revealNarrator ? (
               <>
-                <p className="prose-life mt-3 text-[14.5px]">{content.world.narratorText}</p>
+                <p className="prose-life fade-enter mt-3 text-[15px]">{content.world.narratorText}</p>
                 <ReviseLink onClick={() => setRevising({ target: 'world.narrator', label: '只有叙事者知道' })} />
               </>
             ) : null}
@@ -375,11 +380,11 @@ function Review({ page, content, notice }: { page: DraftPage; content: Draft; no
         </Notice>
       ) : null}
 
-      <div className="pb-safe fixed inset-x-0 bottom-0 z-10 border-t border-border bg-bg/95 backdrop-blur md:left-60">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 md:px-6">
-          <p className="hidden flex-1 text-[12px] text-muted sm:block">诞生之后，出身就定下了；之后的变化来自他们自己的经历。</p>
+      <div className="sticky bottom-0 z-10 -mx-2 -mb-14 mt-10 bg-bg px-2 pb-4 pt-3">
+        <div className="flex items-center gap-3 rounded-[18px] bg-surface p-2 shadow-pop sm:pl-5">
+          <p className="hidden flex-1 text-[12px] leading-relaxed text-muted sm:block">诞生之后，出身就定下了；之后的变化来自他们自己的经历。</p>
           <Button size="lg" className="flex-1 sm:flex-none" loading={birthing} onClick={birth}>
-            <Sparkles className="h-4 w-4" />
+            <Sparkles />
             让{content.characters.length > 1 ? '他们' : ' TA '}诞生
           </Button>
         </div>
@@ -393,7 +398,10 @@ function Review({ page, content, notice }: { page: DraftPage; content: Draft; no
 
 function ReviseLink({ onClick }: { onClick: () => void }) {
   return (
-    <button onClick={onClick} className="mt-3 inline-flex items-center gap-1.5 text-[13px] text-accent">
+    <button
+      onClick={onClick}
+      className="-ml-2 mt-3 inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] text-accent transition-colors hover:bg-accent-soft"
+    >
       <Wand2 className="h-3.5 w-3.5" />
       让 AI 改这一段
     </button>
@@ -408,40 +416,46 @@ function CharacterDraftCard({ character, onEdit, onRevise }: { character: DraftC
     <Card className="p-5">
       <div className="flex items-center gap-3">
         <Avatar name={character.name} size={44} />
-        <div className="flex-1 font-serif text-[19px] font-semibold">{character.name}</div>
+        <div className="flex-1 font-serif text-[20px] font-semibold">{character.name}</div>
         <Button size="sm" variant="ghost" onClick={onEdit}>
           <PenLine className="h-3.5 w-3.5" />
           手改
         </Button>
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-4">
         {shown.map((s, i) => (
           <div key={i}>
-            {s.title ? <div className="text-[12px] font-medium text-muted">{s.title}</div> : null}
-            <p className="prose-life text-[14.5px]">{s.body}</p>
+            {s.title ? <div className="mb-1 text-[12px] font-medium tracking-wide text-faint">{s.title}</div> : null}
+            <p className="prose-life text-[15px]">{s.body}</p>
           </div>
         ))}
       </div>
       {sections.length > 3 ? (
-        <button onClick={() => setExpanded(!expanded)} className="mt-2 text-[13px] text-muted hover:text-text">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-3 inline-flex items-center gap-0.5 text-[13px] text-muted transition-colors hover:text-text"
+        >
           {expanded ? '收起' : `展开全部 ${sections.length} 段`}
+          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', expanded && 'rotate-180')} />
         </button>
       ) : null}
       <div>
         <ReviseLink onClick={onRevise} />
       </div>
       {character.views.length > 0 || character.concerns.length > 0 ? (
-        <div className="mt-4 space-y-2 border-t border-border pt-4">
+        <div className="mt-5 space-y-2.5 border-t border-border/70 pt-4">
           {character.views.map((v, i) => (
-            <div key={`v${i}`} className="text-[13.5px] leading-relaxed">
-              <span className="mr-1.5 rounded bg-surface-2 px-1.5 py-0.5 text-[11px] text-muted">看{v.name}</span>
-              {v.text}
+            <div key={`v${i}`} className="flex gap-2.5 text-[14px] leading-relaxed">
+              <span className="mt-[3px] h-fit shrink-0 rounded-md bg-surface-2 px-1.5 text-[11px] leading-[18px] text-muted">看{v.name}</span>
+              <span className="min-w-0">{v.text}</span>
             </div>
           ))}
           {character.concerns.map((c, i) => (
-            <div key={`c${i}`} className="text-[13.5px] leading-relaxed">
-              <span className="mr-1.5 rounded bg-warn-soft px-1.5 py-0.5 text-[11px] text-warn">牵挂{c.about ? ` · ${c.about}` : ''}</span>
-              {c.text}
+            <div key={`c${i}`} className="flex gap-2.5 text-[14px] leading-relaxed">
+              <span className="mt-[3px] h-fit shrink-0 rounded-md bg-warn-soft px-1.5 text-[11px] leading-[18px] text-warn">
+                牵挂{c.about ? ` · ${c.about}` : ''}
+              </span>
+              <span className="min-w-0">{c.text}</span>
             </div>
           ))}
         </div>
@@ -679,7 +693,7 @@ function ReviseSheet({
               幕后
             </Link>
           </div>
-          <div className={cn('prose-life max-h-[50dvh] overflow-y-auto rounded-xl bg-surface-2/70 p-4 text-[14.5px]')}>{result.text}</div>
+          <div className="prose-life scrollbar-thin max-h-[50dvh] overflow-y-auto rounded-xl bg-surface-2/70 p-4 text-[15px]">{result.text}</div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -692,9 +706,9 @@ function ReviseSheet({
           />
           <div className="flex flex-wrap gap-1.5">
             {REVISE_HINTS.map((h) => (
-              <button key={h} onClick={() => setInstruction(h)} className="rounded-full bg-surface-2 px-2.5 py-1 text-[12px] text-muted hover:text-text">
+              <Suggestion key={h} onClick={() => setInstruction(h)}>
                 {h}
-              </button>
+              </Suggestion>
             ))}
           </div>
           {working ? <Typing label="正在改" /> : null}
@@ -726,9 +740,9 @@ function DeleteDraft({ page }: { page: DraftPage }) {
   }
   return (
     <>
-      <button onClick={() => setOpen(true)} className="rounded-full p-2 text-muted hover:bg-surface-2" aria-label="删除草稿">
-        <Trash2 className="h-[18px] w-[18px]" />
-      </button>
+      <IconButton onClick={() => setOpen(true)} aria-label="删除草稿" title="删除草稿">
+        <Trash2 className="!h-[18px] !w-[18px]" />
+      </IconButton>
       <Sheet
         open={open}
         onOpenChange={setOpen}

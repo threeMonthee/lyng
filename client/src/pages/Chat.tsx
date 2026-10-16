@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Hourglass, MoreHorizontal, Repeat, RotateCw, ScrollText, UserRound } from 'lucide-react'
+import { AlertCircle, Eye, EyeOff, Hourglass, MoreHorizontal, Repeat, RotateCw, ScrollText, UserRound } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -10,11 +10,12 @@ import { chatTime, needsTimeSeparator } from '@/lib/format'
 import type { ChatPage, Message } from '@/lib/types'
 import { cn } from '@/lib/cn'
 import { PageHeader } from '@/components/app/PageHeader'
-import { Composer } from '@/components/app/Composer'
+import { Composer, ComposerAction } from '@/components/app/Composer'
+import { JumpToBottom } from '@/components/app/JumpToBottom'
 import { InnerVoice } from '@/components/app/script'
 import { sides } from '@/components/app/summaries'
 import { Avatar } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
+import { Button, IconButton } from '@/components/ui/button'
 import { ErrorState, Notice, PageLoading, Typing } from '@/components/ui/feedback'
 import { Menu, MenuItem, MenuSeparator } from '@/components/ui/menu'
 
@@ -96,7 +97,7 @@ export function ChatPage() {
 
   const messages = useMemo(() => [...older, ...(data?.messages ?? [])], [older, data?.messages])
   const turns = useMemo(() => toTurns(messages), [messages])
-  const { ref: feedRef, toBottom } = useStickToBottom([messages.length, drafts.length, typing, notice])
+  const { ref: feedRef, toBottom, away } = useStickToBottom([messages.length, drafts.length, typing, notice])
 
   const append = useCallback(
     (list: Message[]) =>
@@ -217,29 +218,30 @@ export function ChatPage() {
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         narrow
+        bordered
         back="/messages"
         title={
-          <Link to={`/characters/${other.id}`} className="inline-flex items-center gap-2">
+          <Link to={`/characters/${other.id}`} className="inline-flex max-w-full items-center gap-2 align-middle">
             <Avatar name={other.name} size={26} />
-            {other.name}
+            <span className="truncate">{other.name}</span>
           </Link>
         }
         subtitle={`你是${played.name} · ${chat.worldName}`}
         actions={
           <>
-            <button
+            <IconButton
               onClick={() => setShowInner(!showInner)}
-              className={cn('rounded-full p-2 hover:bg-surface-2', showInner ? 'text-inner' : 'text-faint')}
+              className={showInner ? 'text-inner hover:text-inner' : undefined}
               aria-label={showInner ? '隐藏心声' : '显示心声'}
               title={showInner ? '隐藏心声' : '显示心声'}
             >
-              {showInner ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
-            </button>
+              {showInner ? <Eye /> : <EyeOff />}
+            </IconButton>
             <Menu
               trigger={
-                <button className="rounded-full p-2 text-text hover:bg-surface-2" aria-label="更多">
-                  <MoreHorizontal className="h-5 w-5" />
-                </button>
+                <IconButton aria-label="更多">
+                  <MoreHorizontal />
+                </IconButton>
               }
             >
               <MenuItem icon={<Repeat />} disabled={busy || chat.pending} onSelect={() => switchSides(other.id)}>
@@ -260,104 +262,115 @@ export function ChatPage() {
         }
       />
 
-      <div ref={feedRef} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-2xl px-3 pb-4 pt-3 md:px-4">
-          {hasMore ? (
-            <div className="mb-2 flex justify-center">
-              <Button size="sm" variant="ghost" loading={loadingOlder} onClick={loadOlder}>
-                更早的消息
-              </Button>
-            </div>
-          ) : null}
-          {messages.length === 0 && !busy ? (
-            <div className="py-16 text-center text-[13px] leading-relaxed text-muted">
-              你是{played.name}，在和{other.name}私聊。
-              <br />
-              说点什么，或者点输入框左边的沙漏，等{other.name}先开口。
-            </div>
-          ) : null}
-
-          {turns.map((t) => {
-            const mine = t.speakerId === played.id
-            const separator = needsTimeSeparator(previousAt, t.at)
-            previousAt = t.says[t.says.length - 1]?.createdAt ?? t.inner?.createdAt ?? t.at
-            const speaker = t.speakerId === other.id ? other : played
-            return (
-              <Fragment key={t.key}>
-                {separator ? <div className="my-4 text-center text-[11px] text-faint">{chatTime(t.at)}</div> : null}
-                {t.opportunity === 'reach' && !t.byUser ? (
-                  <div className="my-2 text-center text-[11px] text-faint">{speaker.name}主动发来</div>
-                ) : null}
-                <div className={cn('my-1.5 flex gap-2', mine ? 'flex-row-reverse pl-12' : 'pr-12')}>
-                  {!mine ? <Avatar name={speaker.name} size={32} className="mt-0.5" /> : null}
-                  <div className={cn('flex min-w-0 flex-col gap-1', mine ? 'items-end' : 'items-start')}>
-                    {t.says.map((m) => (
-                      <div
-                        key={m.id}
-                        className={cn(
-                          'max-w-full whitespace-pre-wrap break-words rounded-[18px] px-3.5 py-2 text-[15px] leading-relaxed',
-                          mine ? 'rounded-br-md bg-me text-me-fg' : 'rounded-bl-md border border-border bg-surface',
-                        )}
-                      >
-                        {m.text}
-                      </div>
-                    ))}
-                    {t.says.length === 0 && !t.byUser ? <div className="py-1 text-[13px] text-faint">没有回复</div> : null}
-                    {t.inner && showInner ? <InnerVoice text={t.inner.text} className={mine ? 'text-right' : ''} /> : null}
-                  </div>
-                </div>
-              </Fragment>
-            )
-          })}
-
-          {drafts.length > 0 || typing || (!streaming && chat.running) ? (
-            <div className="my-1.5 flex gap-2 pr-12">
-              <Avatar name={other.name} size={32} className="mt-0.5" />
-              <div className="flex flex-col items-start gap-1 opacity-75">
-                {drafts.map((d, i) => (
-                  <div key={i} className="rounded-[18px] rounded-bl-md border border-border bg-surface px-3.5 py-2 text-[15px] leading-relaxed">
-                    {d}
-                  </div>
-                ))}
-                <div className="rounded-[18px] rounded-bl-md border border-border bg-surface px-3.5 py-2.5">
-                  <Typing />
-                </div>
-              </div>
-            </div>
-          ) : null}
-
-          {stuck ? (
-            <div className="my-4 rounded-2xl border border-danger/25 bg-danger-soft/60 p-4">
-              <p className="text-[14px] font-medium text-danger">
-                {chat.failure ? `${other.name}这一次没有回成` : `上一次${other.name}没有回完`}
-              </p>
-              {chat.failure ? <p className="mt-1 text-[13px] leading-relaxed text-muted">{chat.failure}</p> : null}
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" onClick={() => run(`/chats/${id}/retry`, {})}>
-                  <RotateCw className="h-3.5 w-3.5" />
-                  重试
+      <div className="relative min-h-0 flex-1">
+        <div ref={feedRef} className="scrollbar-thin h-full overflow-y-auto">
+          <div className="mx-auto w-full max-w-2xl px-3 pb-5 pt-3 md:px-4">
+            {hasMore ? (
+              <div className="mb-2 flex justify-center">
+                <Button size="sm" variant="ghost" loading={loadingOlder} onClick={loadOlder}>
+                  更早的消息
                 </Button>
-                <Link to={failedRun ? `/runs/${failedRun}` : `/runs?conversationId=${id}`}>
-                  <Button size="sm" variant="ghost">
-                    看幕后
-                  </Button>
-                </Link>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+            {messages.length === 0 && !busy ? (
+              <div className="fade-enter flex flex-col items-center px-6 py-16 text-center">
+                <Avatar name={other.name} size={64} />
+                <p className="mt-4 text-[15px] font-medium">{other.name}</p>
+                <p className="mt-1.5 max-w-xs text-[13px] leading-relaxed text-muted">
+                  你是{played.name}。说点什么，或者点输入框左边的沙漏，等{other.name}先开口。
+                </p>
+              </div>
+            ) : null}
 
-          {notice ? (
-            <Notice tone="danger" className="my-3">
-              {notice}
-            </Notice>
-          ) : null}
+            {turns.map((t) => {
+              const mine = t.speakerId === played.id
+              const separator = needsTimeSeparator(previousAt, t.at)
+              previousAt = t.says[t.says.length - 1]?.createdAt ?? t.inner?.createdAt ?? t.at
+              const speaker = t.speakerId === other.id ? other : played
+              return (
+                <Fragment key={t.key}>
+                  {separator ? <div className="mb-3 mt-6 text-center text-[11px] tabular-nums text-faint">{chatTime(t.at)}</div> : null}
+                  {t.opportunity === 'reach' && !t.byUser ? (
+                    <div className="my-3 flex justify-center">
+                      <span className="rounded-full bg-surface-2/80 px-2.5 py-0.5 text-[11px] text-muted">{speaker.name}主动发来</span>
+                    </div>
+                  ) : null}
+                  <div className={cn('enter my-2.5 flex gap-2', mine ? 'flex-row-reverse pl-14' : 'pr-14')}>
+                    {!mine ? (
+                      <Link to={`/characters/${speaker.id}`} className="mt-1 shrink-0">
+                        <Avatar name={speaker.name} size={30} />
+                      </Link>
+                    ) : null}
+                    <div className={cn('flex min-w-0 flex-col gap-[3px]', mine ? 'items-end' : 'items-start')}>
+                      {t.says.map((m, i) => (
+                        <div key={m.id} className={cn(bubble, mine ? 'bg-me text-me-fg' : 'bg-surface shadow-card', corners(mine, i))}>
+                          {m.text}
+                        </div>
+                      ))}
+                      {t.says.length === 0 && !t.byUser ? <div className="py-1.5 text-[13px] text-faint">没有回复</div> : null}
+                      {t.inner && showInner ? <InnerVoice text={t.inner.text} className="mt-1" /> : null}
+                    </div>
+                  </div>
+                </Fragment>
+              )
+            })}
+
+            {drafts.length > 0 || typing || (!streaming && chat.running) ? (
+              <div className="my-2.5 flex gap-2 pr-14">
+                <Avatar name={other.name} size={30} className="mt-1" />
+                <div className="flex flex-col items-start gap-[3px]">
+                  {drafts.map((d, i) => (
+                    <div key={i} className={cn(bubble, 'bg-surface opacity-80 shadow-card', corners(false, i))}>
+                      {d}
+                    </div>
+                  ))}
+                  <div
+                    className={cn(
+                      'fade-enter flex h-[38px] items-center bg-surface px-4 shadow-card',
+                      corners(false, drafts.length),
+                    )}
+                  >
+                    <Typing />
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {stuck ? (
+              <div className="enter my-5 rounded-2xl bg-danger-soft/70 p-4 shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--danger)_18%,transparent)]">
+                <p className="flex items-center gap-2 text-[14px] font-medium text-danger">
+                  <AlertCircle className="h-4 w-4" />
+                  {chat.failure ? `${other.name}这一次没有回成` : `上一次${other.name}没有回完`}
+                </p>
+                {chat.failure ? <p className="mt-1 pl-6 text-[13px] leading-relaxed text-muted">{chat.failure}</p> : null}
+                <div className="mt-3 flex gap-2 pl-6">
+                  <Button size="sm" onClick={() => run(`/chats/${id}/retry`, {})}>
+                    <RotateCw />
+                    重试
+                  </Button>
+                  <Link to={failedRun ? `/runs/${failedRun}` : `/runs?conversationId=${id}`}>
+                    <Button size="sm" variant="ghost">
+                      看幕后
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : null}
+
+            {notice ? (
+              <Notice tone="danger" className="my-3">
+                {notice}
+              </Notice>
+            ) : null}
+          </div>
         </div>
+        <JumpToBottom show={away} onClick={() => toBottom(true)} />
       </div>
 
-      <div className="pb-safe shrink-0 border-t border-border bg-bg/95 backdrop-blur">
-        <div className="mx-auto w-full max-w-2xl px-3 py-2.5">
+      <div className="pb-safe shrink-0 bg-bg shadow-[0_-1px_0_var(--border)]">
+        <div className="mx-auto w-full max-w-2xl px-3 pb-3 pt-2.5 md:px-4">
           {blocked ? (
-            <Notice tone="warn" className="mb-2">
+            <Notice tone="warn" className="mb-2.5">
               {data.busy.map((s) => (
                 <span key={s.id}>
                   {s.cast
@@ -365,7 +378,7 @@ export function ChatPage() {
                     .map((p) => p.name)
                     .join('和')}
                   正在
-                  <Link to={`/scenes/${s.id}`} className="mx-0.5 underline">
+                  <Link to={`/scenes/${s.id}`} className="mx-0.5 font-medium underline underline-offset-2">
                     第{s.number}场
                   </Link>
                   里，那一场结束后才能接着私聊。
@@ -381,23 +394,28 @@ export function ChatPage() {
             disabled={busy || stuck || blocked}
             placeholder={`以${played.name}的身份发消息`}
             leading={
-              <button
-                type="button"
+              <ComposerAction
                 onClick={() => {
                   toBottom()
                   void run(`/chats/${id}/continue`, {})
                 }}
                 disabled={busy || stuck || blocked}
                 title={`不说话，等${other.name}接着说`}
-                aria-label={`等${other.name}接着说`}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted transition hover:bg-surface-2 disabled:opacity-35"
               >
-                <Hourglass className="h-5 w-5" />
-              </button>
+                <Hourglass />
+              </ComposerAction>
             }
           />
         </div>
       </div>
     </div>
   )
+}
+
+const bubble = 'max-w-full whitespace-pre-wrap break-words rounded-[20px] px-3.5 py-2 text-[15px] leading-[1.6]'
+
+/** 连着的几条气泡：靠近说话人那一侧的圆角收紧，读起来是一组。 */
+export function corners(mine: boolean, index: number): string {
+  if (mine) return cn('rounded-br-[6px]', index > 0 && 'rounded-tr-[6px]')
+  return cn('rounded-bl-[6px]', index > 0 && 'rounded-tl-[6px]')
 }
