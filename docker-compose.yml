@@ -1,0 +1,21 @@
+# 本机没有 PostgreSQL 时用它：scripts/start.sh 会自动起这个容器。
+# 数据库 lyng（运行）与 lyng_test（测试），用户与密码都是 lyng，只监听本机。
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: lyng
+      POSTGRES_PASSWORD: lyng
+      POSTGRES_DB: lyng
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - lyng-db:/var/lib/postgresql/data
+      - ./scripts/db-init.sql:/docker-entrypoint-initdb.d/db-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lyng -d lyng"]
+      interval: 2s
+      retries: 30
+
+volumes:
+  lyng-db:
