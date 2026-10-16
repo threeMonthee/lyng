@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dfebd2788bdf226981bf6c0d4de6490c843c3223",
+  "prompts": {},
+  "humans": {
+    "h_7a0f0a5af51c1b": {
+      "author": "RyanX <yalla@XMacBookPro.local>"
+    }
+  }
+}
