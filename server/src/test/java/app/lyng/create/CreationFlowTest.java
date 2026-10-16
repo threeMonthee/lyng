@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import app.lyng.mind.Markup;
 import app.lyng.mind.Markup.Draft;
 import app.lyng.mind.Prompts.Answer;
-import app.lyng.model.CallFailure;
 import app.lyng.model.ModelException;
 import app.lyng.model.Purpose;
 import app.lyng.store.Conflict;
@@ -147,8 +146,8 @@ class CreationFlowTest extends IntegrationTest {
     @Test
     void aFailedQuestionStepIsVisibleAndCanBeAskedAgain() {
         model.fail(Purpose.ASK, ModelException.Kind.FATAL, "401");
-        assertThatThrownBy(() -> creation.start(null, "临水小城")).isInstanceOf(CallFailure.class);
-        CreationService.Page page = creation.unfinished().getFirst();
+        CreationService.Page page = creation.start(null, "临水小城");
+        assertThat(creation.unfinished()).extracting(CreationService.Page::id).containsExactly(page.id());
         assertThat(page.failure()).contains("401");
         assertThat(page.questions()).isNull();
         model.reply(Purpose.ASK, "【无】");

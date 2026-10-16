@@ -89,7 +89,10 @@ public class CreationService {
         return page(drafts.require(draftId));
     }
 
-    /** 新的一念：记下这句话，再看要不要先问几件事。worldId 不为空表示在已有世界里添人物。 */
+    /**
+     * 新的一念：记下这句话，再看要不要先问几件事。worldId 不为空表示在已有世界里添人物。
+     * 追问失败时草稿照样返回（带着失败），页面可以再问一次或跳过追问直接写。
+     */
     public Page start(UUID worldId, String request) {
         if (request == null || request.isBlank()) {
             throw new IllegalArgumentException("用一句话写下你想进入的世界、想遇见的人");
@@ -98,7 +101,11 @@ public class CreationService {
             worlds.requireWorld(worldId);
         }
         UUID id = drafts.create(worldId, request.strip());
-        return ask(id);
+        try {
+            return ask(id);
+        } catch (CallFailure e) {
+            return page(id);
+        }
     }
 
     /** 追问（失败后可以再来一次）。 */
